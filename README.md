@@ -1,24 +1,25 @@
-# LUTCTF 工具合集 · 兰州理工大学 K4L0NG
+# 奇点 CTF 工具合集 · 奇点战队
 
-面向 **兰州理工大学 K4L0NG 战队** 与 **甘肃省「海丰杯」高校网络安全技能大赛** 的一体化解题工作台。
+面向 **奇点战队（Singularity）** 与 **甘肃省「海丰杯」高校网络安全技能大赛** 的一体化解题工作台。
 
-![LUTCTF 工具合集](assets/screenshot.png)
+![奇点 CTF 工具合集](assets/screenshot.png)
 
-> 48 个内置工具 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
+> 49 个内置工具入口 · 集成 EBCTFCodeBox 811 函数 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
+> v2.1 新增：奇点战队品牌、EBCTFCodeBox 完整密码学工具箱（Apache-2.0，811 函数）
 > v2.0 新增：一把梭智能解码、配方链、字符显示器、收藏夹与侧栏计数、外部工具启动台、Base36/45/62
 > v1.1 新增：PCAP/PCAPNG 流量分析、PNG 宽高修复、Web 字典爆破、Cookie 越权、AES-CBC 原始字节、ELF/PE checksec、Pwn 速查、QR 识别、Brainfuck、核心价值观、海丰杯 2025 题目复盘
 
 ## 下载
 
-[**GitHub Releases · v2.0.0**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.0.0) → 下载 `LUTCTF.v2.0.Win64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
+[**GitHub Releases · v2.1.0**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.1.0) → 下载 `Qidian-CTF-Toolkit-2.1.0-win-x64.zip`，解压后双击 `奇点 CTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
 
 ---
 
 ## 一、快速开始
 
-**方式一（推荐）**：双击桌面上的 **「LUTCTF 工具合集」** 快捷方式即可启动。
+**方式一（推荐）**：双击桌面上的 **「奇点 CTF 工具合集」** 快捷方式即可启动。
 
-**方式二**：进入安装目录 `LUTCTF-Toolkit`，双击 `start.bat`。
+**方式二**：进入项目目录 `LUTCTF-Toolkit`，双击 `start.bat`。
 
 **方式三（命令行 / 开发）**：
 ```bash
@@ -28,7 +29,7 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 ```
 
 **方式四（发给同学 / 下载即用）**：
-从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.0.0) 下载 `LUTCTF.v2.0.Win64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
+从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.1.0) 下载 `Qidian-CTF-Toolkit-2.1.0-win-x64.zip`，解压后双击 `奇点 CTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
 
 > 首次启动若被 Windows Defender SmartScreen 拦截，选择「更多信息 → 仍要运行」即可（未签名的自编译应用常见现象）。
 
@@ -94,7 +95,7 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 ### 🧰 外部整合
 - **本机工具箱**：整合 sqlmap / nmap / hashcat / binwalk / zsteg / volatility 等 **50+ 外部工具**，检测本机安装情况并**一键拉起终端**
 - **在线资源导航**：CTF 训练平台、Writeup 站点、密码查询、威胁情报
-- **海丰杯备战指南**：按官方赛点拆解五大方向 + K4L0NG 战队分工与比赛节奏建议
+- **海丰杯备战指南**：按官方赛点拆解五大方向 + 奇点战队分工与比赛节奏建议
 
 ### 🎯 效率与体验（v2.0 新增）
 - **一把梭智能解码**：递归尝试 Base64/32/58/85/91、Hex、URL、Unicode、QP、ROT13、核心价值观、Base36/45/62 等，按可读性评分给出最佳解码链
@@ -103,6 +104,12 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 - **收藏夹与侧栏计数**：卡片右上角 ★ 收藏，首页“收藏”筛选，侧栏显示每个知识域的工具数
 - **外部工具启动台**：按 Web/信息收集/密码/隐写/逆向/流量分类展示本机工具，检测安装状态并一键开终端
 - **Base36 / Base45 / Base62**：补全 CTF 常见的非标准 Base 编码（Base45 常用于 QR）
+
+### 🧪 EBCTFCodeBox 完整模块（v2.1）
+- 集成 **[EBCTFCodeBox](https://github.com/Henglie/EBCTFCodeBox)**（Apache-2.0）：800+ 编解码/密码学/隐写/分析函数
+- 含一把梭、配方链、图形编码图鉴、全 Unicode 显示、深奥语言等完整功能
+- 作为独立静态模块嵌入，由本机 `127.0.0.1` 临时端口提供；不联网、不上传
+- 上游代码未修改，License 与来源见 `renderer/ebctf/LICENSE`、`THIRD_PARTY_NOTICES.md`
 
 ### 📡 流量 / 取证（v1.1 新增）
 - **PCAP 流量分析台**：离线解析 pcap/pcapng，提取 HTTP 请求/响应、multipart 上传对象、DNS、Telnet、TCP 流、字符串与 flag 线索，支持导出对象
@@ -144,24 +151,41 @@ LUTCTF-Toolkit/
 │       ├── registry.js      # 工具注册表① 编码 / 古典 / 密码学
 │       ├── registry2.js     # 工具注册表② 隐写取证 / Web 安全
 │       ├── registry3.js     # 工具注册表③ 杂项 / 应急响应 / 外部工具
+│       ├── registry4.js     # 工具注册表④ Web 爆破 / 流量 / PNG / 深奥语言
+│       ├── registry5.js     # 工具注册表⑤ 二进制 / Pwn / QR / 海丰杯实战
+│       ├── registry6.js     # 工具注册表⑥ 一把梭 / 配方链 / 字符显示器 / 启动台
+│       ├── registry7.js     # EBCTFCodeBox 嵌入模块
 │       └── core/
 │           ├── codec.js     # 编码引擎（Base 全族 / URL / HTML / Unicode / Morse）
 │           ├── classical.js # 古典密码 + 自动破译（χ² / IC / 爬山法）
 │           ├── digest.js    # MD5 / MD4 / SM3 / CRC32 / SM4 / RC4 / AES
 │           ├── rsa.js       # RSA 全套攻击（BigInt）
 │           ├── stego.js     # LSB / 文件结构 / strings / FFT 频谱
-│           ├── web.js       # Payload 库 / JWT / HTTP
+│           ├── webkit.js    # Payload 库 / JWT / HTTP
+│           ├── forensics.js # PCAP/PCAPNG 解析 / PNG 修复
+│           ├── ctf.js       # 二进制体检 / 核心价值观 / Brainfuck
 │           ├── misc.js      # 进制 / 时间 / 字典 / 速查
 │           └── exttools.js  # 外部工具与在线资源数据
+├── renderer/ebctf/          # EBCTFCodeBox 静态模块（Apache-2.0）
+├── renderer/vendor/         # jsQR 等离线第三方库
 └── node_modules/            # Electron 运行时（请勿删除）
 ```
 
 ---
 
-## 六、免责声明
+## 六、第三方组件与许可
+
+- **EBCTFCodeBox**：Apache-2.0，上游 <https://github.com/Henglie/EBCTFCodeBox>，原样嵌入 `renderer/ebctf/`，由本地 `127.0.0.1` 端口提供；完整许可见 `renderer/ebctf/LICENSE`。
+- **jsQR**：MIT，用于离线二维码识别。
+- **Electron / electron-builder**：MIT，仅作为运行时与打包工具。
+- 详细来源、版本与修改说明见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)。
+
+---
+
+## 七、免责声明
 
 本工具仅供**网络安全学习、授权测试与正式竞赛**使用。请在法律允许范围内使用，禁止用于未经授权的系统渗透、破坏或任何违法活动。作者不承担因滥用造成的任何责任。
 
 ---
 
-**Built for 兰州理工大学 K4L0NG · 为海丰杯而生** 🧡💙
+**Built for 奇点战队（Singularity） · 为海丰杯而生**

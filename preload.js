@@ -14,5 +14,6 @@ contextBridge.exposeInMainWorld('api', {
   saveFile: (name, data) => ipcRenderer.invoke('save-file', { name, data }),
   http: (opts) => ipcRenderer.invoke('http-request', opts),
   aesCbc: (opts) => ipcRenderer.invoke('aes-cbc', opts),
+  ebctfUrl: () => ipcRenderer.sendSync('ebctf-url'),
   scanTool: (name) => ipcRenderer.invoke('scan-tool', name)
 });

@@ -1,0 +1,71 @@
+OutGuess 0.4 - WASM candidate - attribution and license notice
+=============================================================
+
+This directory contains a WebAssembly build of OutGuess 0.4, compiled from
+
+  resurrecting-open-source-projects/outguess
+  commit 24810e14327c2bbeedeaadd3e24491f2a4425c02
+
+The upstream sources are unmodified.  Only two generated build headers
+(src/config.h and src/jpeg-6b-steg/jconfig.h) were added outside the
+upstream tree; see ../wasm-build/build_wasm.py.
+
+----------------------------------------------------------------------------
+OutGuess (BSD-4-Clause) - REQUIRED ACKNOWLEDGEMENT, do not remove
+----------------------------------------------------------------------------
+
+  This product includes software developed by Niels Provos.
+
+Clause 3 of the license requires that all advertising materials mentioning
+features or use of this software display the acknowledgement above.  Clause 4
+forbids using the author's name to endorse or promote derived products without
+specific prior written permission.
+
+The full license text is in ./LICENSE-outguess.txt.  Clause 1 also requires
+this notice to be retained in source distributions; clause 2 requires it in
+binary distributions.  The WASM build is a binary distribution, so both this
+notice and the acknowledgement above must ship with it.
+
+Additionally, src/err.c carries its own BSD-4-Clause notice from the
+University of California, Berkeley with the acknowledgement:
+
+  This product includes software developed by the University of California,
+  Berkeley and its contributors.
+
+----------------------------------------------------------------------------
+Independent JPEG Group (IJG) - REQUIRED NOTICE, do not remove
+----------------------------------------------------------------------------
+
+  this software is based in part on the work of the Independent JPEG Group
+
+The JPEG codec used here is the patched libjpeg 6b shipped by OutGuess
+(src/jpeg-6b-steg), copyright (C) 1991-1998 Thomas G. Lane.  IJG condition (2)
+requires the sentence above in the documentation of binary-only
+distributions, and condition (1) requires the IJG README to ship unaltered
+whenever any part of the source is distributed.  The unaltered IJG README is
+in ./LICENSE-IJG-README.txt.
+
+----------------------------------------------------------------------------
+Other components
+----------------------------------------------------------------------------
+
+  src/golay.c          BSD-3-Clause (Robert Morelos-Zaragoza, 1994; relicensed
+                       to BSD by the author, see doc/LICENSE.golay upstream)
+  src/md5.c            Public domain (Colin Plumb, 1993)
+  tests/test.jpg       CC0 1.0 / Public domain (upstream tests/LICENSE)
+
+Not compiled into this build: src/fourier.c (FOURIER off upstream),
+src/histogram.c (separate upstream binary, no license header upstream),
+src/jpeg-6b-steg/ansi2knr.c (GPL build tool, deliberately excluded),
+src/jpeg-6b-steg/jmemdosa.asm (MS-DOS only).
+
+----------------------------------------------------------------------------
+Honesty note
+----------------------------------------------------------------------------
+
+This is a technical candidate, not a released product, and it is NOT wired
+into the application.  "OutGuess 0.4" is a specific historical version of an
+archived upstream project; this build does not claim compatibility with
+OutGuess 0.2 / 0.13, with steghide, or with any other steganography tool.
+The embedded payload carries no MAC: producing N bytes back does NOT prove
+the passphrase was correct.

@@ -1,0 +1,184 @@
+/*
+ * customImplClient.js — 自定义算法主线程调度端（照 magicClient 的三层防护模式）。
+ *
+ * 执行策略（红线：沙箱 + 超时，防死循环冻页面）：
+ *  1. Worker 优先：module Worker 独立 realm 跑用户代码（隔离 DOM/存储/派生线程；网络能力保留，
+ *     用户代码可主动外发自己指定的数据），主线程零阻塞；
+ *  2. 超时硬杀：CUSTOM_TIMEOUT_MS 到点 terminate 该 Worker，页面不冻（下次调用惰性重建干净实例）；
+ *  3. 降级主线程：环境无 Worker / 模块 Worker 不可用（老浏览器、file:// 限制、CSP）→ 主线程同步执行。
+ *     ⚠ 降级路径只有词法遮蔽，没有 realm 隔离，也无法硬杀死循环。返回值里带 sandbox:"main"，
+ *       调用方（编辑器状态条）必须如实告诉用户，别让人以为一直在沙箱里。
+ *  4. 增强随机性生效时（非 system 档 / 鼠标熵辅助已开）：把「档位配置 + 服务器预取池快照」
+ *     随请求送进 Worker，Worker 端用同一份 randSource 复现同源取数（H.randBytes 跟随档位）。
+ *     **沙箱隔离与超时硬杀全部保留**——不把执行赶到主线程（那是 op 运行器的做法，因为它没法
+ *     把配置传进 Worker；自定义实现这边可以，故不做这个牺牲）。
+ */
+import { runCustomImpl, buildHelpers } from "./customImpl.js";
+import { getRandConfig, randomBytes as randSourceBytes, isMouseAuxOn, snapshotServerPool } from "./randSource.js";
+
+let _worker = null;
+let _workerBroken = false;   // 创建/加载失败后永久走主线程降级，不反复试错
+let _seq = 0;
+const _pending = new Map();  // runId → settle 回调（Worker 被杀时统一收尾，不留悬挂 Promise）
+let _running = false;
+
+/** 「增强随机性」是否生效（非 system 档，或鼠标熵辅助已开）。 */
+export function randEnhanced() {
+  try { return getRandConfig().mode !== "system" || isMouseAuxOn(); } catch { return false; }
+}
+
+/** 主线程可用的随机提供者：直连统一随机源（跟随当前档位 / 预取池 / 鼠标熵辅助）。 */
+const _mainRandProvider = (n) => randSourceBytes(n);
+
+/**
+ * 打包当前随机源配置 + 服务器预取池快照，随请求送进 Worker（结构化克隆安全）。
+ * Worker 端据此复现同一随机源 —— 沙箱隔离与超时硬杀全部保留，不必把执行赶到主线程。
+ */
+function buildRandSpec() {
+  const c = getRandConfig();
+  return { mode: c.mode, seed: c.seed, mouse: c.mouse, mouseOn: c.mouseOn, serverPool: snapshotServerPool() };
+}
+
+/** 死循环看门狗时长。2s（与 compress.js TIMEOUT_MS 同量级；需求文档写「700ms 级」是下限参考）。 */
+export const CUSTOM_TIMEOUT_MS = 2000;
+
+function spawnWorker() {
+  if (_worker || _workerBroken) return _worker;
+  if (typeof Worker === "undefined") { _workerBroken = true; return null; }
+  try {
+    _worker = new Worker(new URL("./customImplWorker.js", import.meta.url), { type: "module" });
+    _worker.addEventListener("message", (e) => {
+      const m = e.data || {};
+      const p = _pending.get(m.runId);
+      if (!p) return;
+      if (m.type === "final") { _pending.delete(m.runId); p({ ok: true, out: m.out, sandbox: "worker" }); }
+      else if (m.type === "error") {
+        _pending.delete(m.runId);
+        p({ ok: false, error: m.message, line: m.line ?? null, phase: m.phase || null, reason: m.reason || null, sandbox: "worker" });
+      }
+    });
+    _worker.addEventListener("error", () => {
+      // Worker 自身加载/运行异常（非用户代码抛错——那走 message）：标记不可用并把 pending 全部降级重跑
+      _workerBroken = true;
+      const waiting = [..._pending.values()];
+      _pending.clear();
+      killWorker();
+      for (const p of waiting) p(null); // null = 请调用方走主线程重试
+    });
+  } catch {
+    _workerBroken = true;
+    _worker = null;
+  }
+  return _worker;
+}
+
+function killWorker() {
+  if (_worker) {
+    try { _worker.terminate(); } catch { /* ignore */ }
+    _worker = null;
+  }
+}
+
+/** 主线程直跑（降级路径 / Worker 不可用 / 增强随机性生效时）。 */
+async function runOnMainThread(req) {
+  // 主线程直连统一随机源 → H.randBytes 跟随「增强随机性」当前档位。
+  const res = await runCustomImpl({ ...req, helpers: buildHelpers(_mainRandProvider) });
+  return res.ok
+    ? { ok: true, out: res.out, sandbox: "main" }
+    : { ok: false, error: res.error, line: res.line ?? null, phase: res.phase || null, reason: res.reason || null, sandbox: "main" };
+}
+
+/**
+ * 执行用户自定义实现，带超时看门狗。
+ * @param {{code:string, dir:string, input:string, params:object, rawBytes:?Uint8Array, timeoutMs:?number}} req
+ * @returns {Promise<{ok:true,out:(string|{text:string,files?:Array}),sandbox:string}|{ok:false,error:string,line:?number,timedOut?:boolean,sandbox:string}>}
+ */
+export function runCustomWithTimeout(req) {
+  // The shared Worker cannot start a second job until the first settles.
+  if (_running) return Promise.resolve({ ok: false, error: "自定义实现正在执行，请稍后重试", sandbox: "worker", busy: true });
+  const { code, dir, input, params, rawBytes } = req;
+  const timeoutMs = Number(req.timeoutMs) > 0 ? Number(req.timeoutMs) : CUSTOM_TIMEOUT_MS;
+  const plain = { code, dir, input, params: params || {}, rawBytes: rawBytes || null };
+
+  // 增强随机性生效时，把「档位配置 + 服务器预取池快照」随请求送进 Worker：
+  // Worker 端用同一份 randSource 复现同源取数，H.randBytes 跟随所选档位。
+  // **沙箱隔离与超时硬杀全部保留**（不必像 op 那样把执行赶到主线程）。
+  const randSpec = randEnhanced() ? buildRandSpec() : null;
+  if (randSpec) plain.randSpec = randSpec;
+
+  const worker = spawnWorker();
+  if (!worker) return Promise.resolve(runOnMainThread(plain));
+
+  _running = true;
+  return new Promise((resolve) => {
+    const runId = ++_seq;
+    let settled = false;
+    let retryStarted = false;
+    const finish = (res) => {
+      if (settled) return;
+      // res === null 表示 Worker 挂了，请求还没跑完 → 主线程补跑一次（真降级，不是只报错）。
+      // 主线程执行现在是 async（完整算法源码可能是 async 入口），必须等它真正结束再 resolve，
+      // 否则 _running 会提前放开、允许第二个任务并发进入共享沙箱。
+      if (res === null) {
+        if (retryStarted) return;
+        retryStarted = true;
+        clearTimeout(timer);
+        _pending.delete(runId);
+        runOnMainThread(plain).then((r) => {
+          settled = true;
+          _running = false;
+          resolve(r);
+        });
+        return;
+      }
+      settled = true;
+      _running = false;
+      clearTimeout(timer);
+      _pending.delete(runId);
+      resolve(res);
+    };
+    const timer = setTimeout(() => {
+      killWorker();                        // 硬杀：连同死循环一起清掉
+      for (const [id, p] of _pending) { if (id !== runId) p(null); }
+      _pending.clear();
+      finish({
+        ok: false,
+        error: `执行超时（>${timeoutMs}ms，疑似死循环），已强制终止`,
+        timedOut: true,
+        sandbox: "worker",
+      });
+    }, timeoutMs);
+    _pending.set(runId, finish);
+    try {
+      // Uint8Array 走结构化克隆，Worker 端拿到仍是 Uint8Array
+      worker.postMessage({ type: "run", runId, ...plain });
+    } catch {
+      finish(null);                        // 消息发不出去（不可克隆的 params 等）→ 主线程兜底
+    }
+  });
+}
+
+/**
+ * 探测当前沙箱形态，供 UI 如实展示。
+ * @returns {Promise<{mode:"worker"|"main", stripped:string[], kept:string[]}>}
+ */
+export function probeSandbox(timeoutMs = 1500) {
+  const worker = spawnWorker();
+  if (!worker) return Promise.resolve({ mode: "main", stripped: [], kept: [] });
+  return new Promise((resolve) => {
+    const runId = ++_seq;
+    const done = (v) => { clearTimeout(timer); _pending.delete(runId); resolve(v); };
+    const timer = setTimeout(() => done({ mode: "main", stripped: [], kept: [] }), timeoutMs);
+    _pending.set(runId, (res) => done(res === null ? { mode: "main", stripped: [], kept: [] } : res));
+    const onMsg = (e) => {
+      const m = e.data || {};
+      if (m.type !== "pong" || m.runId !== runId) return;
+      worker.removeEventListener("message", onMsg);
+      done({ mode: "worker", stripped: m.stripped || [], kept: m.kept || [] });
+    };
+    worker.addEventListener("message", onMsg);
+    try { worker.postMessage({ type: "ping", runId }); } catch { done({ mode: "main", stripped: [], kept: [] }); }
+  });
+}
+
+export default { runCustomWithTimeout, probeSandbox, CUSTOM_TIMEOUT_MS };

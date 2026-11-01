@@ -24,11 +24,11 @@ t('SM4-ECB 官方密文(前16B)',ctx.Codec.bytesToHex(ctx.Digest.SM4.ecbEnc(sm4k
 t('SM4-ECB 解密还原',ctx.Codec.bytesToHex(ctx.Digest.SM4.ecbDec(sm4k,ctx.Digest.SM4.ecbEnc(sm4k,sm4p))),'0123456789abcdeffedcba9876543210');
 
 console.log('— 编码往返 —');
-const cases=['兰州理工-K4L0NG!','HaiFeng CTF','flag{test_123}','abc'];
+const cases=['奇点-CTF!','HaiFeng CTF','flag{test_123}','abc'];
 for(const s of cases){ t('B64('+s+')',ctx.Codec.B64.dec(ctx.Codec.B64.enc(s)),s); }
 t('Base32',ctx.Codec.Base32.dec(ctx.Codec.Base32.enc('HaiFeng CTF')),'HaiFeng CTF');
 t('Base32-Crockford',ctx.Codec.Base32.decExt(ctx.Codec.Base32.encExt('HaiFeng')),'HaiFeng');
-t('Base58',ctx.Codec.Base58.dec(ctx.Codec.Base58.enc('lutsec')),'lutsec');
+t('Base58',ctx.Codec.Base58.dec(ctx.Codec.Base58.enc('qidian')),'qidian');
 t('Ascii85',ctx.Codec.Base85.dec(ctx.Codec.Base85.enc('Man is distinguished')),'Man is distinguished');
 t('Z85',ctx.Codec.Base85.z85dec(ctx.Codec.Base85.z85enc('abcdefgh')),'abcdefgh');
 t('Base91',ctx.Codec.Base91.dec(ctx.Codec.Base91.enc('hello world')),'hello world');

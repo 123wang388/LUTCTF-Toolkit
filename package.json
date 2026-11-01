@@ -1,9 +1,9 @@
 {
   "name": "lutctf-toolkit",
-  "version": "2.0.0",
-  "description": "兰州理工大学 K4L0NG 战队 CTF 工具合集 - 为海丰杯而生",
+  "version": "2.1.0",
+  "description": "奇点战队 CTF 工具合集 - 为海丰杯而生",
   "main": "main.js",
-  "author": "LUT 信息安全协会 / K4L0NG",
+  "author": "奇点战队（Singularity）",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -23,9 +23,9 @@
     "electron-builder": "^26.18.0"
   },
   "build": {
-    "appId": "com.lut.k4long.toolkit",
-    "productName": "LUTCTF 工具合集",
-    "copyright": "LUT 信息安全协会 / K4L0NG",
+    "appId": "com.qidian.ctf.toolkit",
+    "productName": "奇点 CTF 工具合集",
+    "copyright": "奇点战队（Singularity）",
     "directories": {
       "output": "dist"
     },
@@ -49,7 +49,7 @@
         }
       ],
       "icon": "assets/icon.ico",
-      "artifactName": "LUTCTF-Toolkit-${version}-portable.${ext}"
+      "artifactName": "Qidian-CTF-Toolkit-${version}-portable.${ext}"
     },
     "portable": {
       "requestExecutionLevel": "user"

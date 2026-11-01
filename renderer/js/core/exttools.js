@@ -98,7 +98,7 @@ const ExtLib = (function () {
     { g: '海丰杯考点', name: '逆向分析与软件破解', desc: 'IDA/Ghidra 静态 + GDB 动态；脱壳与反混淆' },
     { g: '海丰杯考点', name: '数据取证逆向', desc: '磁盘镜像、内存取证 Volatility、日志分析、文件恢复' },
     { g: '海丰杯考点', name: '国产商用密码应用', desc: 'SM2 签名验签、SM3 摘要、SM4 加解密；可能要求 lssl/gmssl 调用' },
-    { g: '组队建议', name: 'K4L0NG 战队分工', desc: 'Web 2 人 / Crypto 1 人 / PWN+RE 1 人 / Misc+取证 1 人；统一 Flag 提交格式并实时同步进度' },
+    { g: '组队建议', name: '奇点战队分工', desc: 'Web 2 人 / Crypto 1 人 / PWN+RE 1 人 / Misc+取证 1 人；统一 Flag 提交格式并实时同步进度' },
     { g: '组队建议', name: '比赛节奏', desc: '开赛 15 分钟全员扫描签到题与 Misc；难题先做信息收集，不要过早深挖某一题' },
     { g: '组队建议', name: '本地字典与工具常备', desc: 'rockyou.txt、directory-list-2.3、SecLists、字典妙用；本机工具先跑一遍 –help 以免忘』' }
   ];

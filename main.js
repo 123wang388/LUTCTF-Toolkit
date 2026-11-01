@@ -1,8 +1,10 @@
 /* ============================================================
    main.js — Electron 主进程
-   兰州理工大学 K4L0NG 战队 · CTF 工具合集
+   奇点战队 · CTF 工具合集
    ============================================================ */
 const path = require('path');
+const http = require('http');
+const fs = require('fs');
 const { spawn } = require('child_process');
 
 /* 某些宿主（VS Code / Electron 宿主 / 终端）会遗留 ELECTRON_RUN_AS_NODE=1，
@@ -49,6 +51,67 @@ if (!electron || !electron.app) {
 const { app, BrowserWindow, ipcMain, shell, dialog } = electron;
 
 let win;
+
+/* ============================================================
+   EBCTFCodeBox 本地静态服务（Apache-2.0 第三方模块）
+   ES module / WASM / Service Worker 需要 http(s) 环境，这里只绑定
+   127.0.0.1 的随机端口，不对外网开放，也不上传任何数据。
+   ============================================================ */
+const EBCTF_MIME = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8', '.webmanifest': 'application/manifest+json',
+  '.wasm': 'application/wasm', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif', '.svg': 'image/svg+xml', '.ico': 'image/x-icon',
+  '.woff': 'font/woff', '.woff2': 'font/woff2', '.ttf': 'font/ttf', '.otf': 'font/otf',
+  '.txt': 'text/plain; charset=utf-8', '.md': 'text/markdown; charset=utf-8',
+  '.map': 'application/json', '.zip': 'application/zip', '.bin': 'application/octet-stream'
+};
+let ebctfPort = 0;
+
+function startEbctfServer() {
+  return new Promise(resolve => {
+    const root = path.join(__dirname, 'renderer', 'ebctf');
+    const server = http.createServer((req, res) => {
+      try {
+        const u = new URL(req.url, 'http://127.0.0.1');
+        let p = decodeURIComponent(u.pathname);
+        if (p === '/' || p === '') p = '/index.html';
+        if (p.endsWith('/')) p += 'index.html';
+        const file = path.normalize(path.join(root, p));
+        const rel = path.relative(root, file);
+        if (rel.startsWith('..') || path.isAbsolute(rel)) {
+          res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end('Forbidden'); return;
+        }
+        fs.readFile(file, (err, data) => {
+          if (err) {
+            res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+            res.end('Not Found'); return;
+          }
+          res.writeHead(200, {
+            'Content-Type': EBCTF_MIME[path.extname(file).toLowerCase()] || 'application/octet-stream',
+            'Cache-Control': 'no-cache',
+            'X-Content-Type-Options': 'nosniff'
+          });
+          if (req.method === 'HEAD') res.end(); else res.end(data);
+        });
+      } catch (e) {
+        res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('Server Error');
+      }
+    });
+    server.on('error', () => { ebctfPort = 0; resolve(); });
+    server.listen(0, '127.0.0.1', () => {
+      ebctfPort = server.address().port;
+      resolve();
+    });
+  });
+}
+
+ipcMain.on('ebctf-url', (e) => {
+  e.returnValue = ebctfPort ? `http://127.0.0.1:${ebctfPort}/index.html` : '';
+});
 
 /* 兼容性加固：虚拟机 / 远程桌面 / 显卡驱动异常的环境下，
    GPU 进程崩溃会导致整个应用退出，这里主动关闭硬件加速以保证稳定启动 */
@@ -104,7 +167,7 @@ function createWindow() {
 
   /* 开发环境快捷键（可选） */
   win.webContents.on('did-finish-load', () => {
-    win.setTitle('LUTCTF 工具合集 · 兰州理工大学 K4L0NG');
+    win.setTitle('奇点 CTF 工具合集 · 奇点战队');
   });
 
   /* 加载失败兜底：避免出现「进程在跑但没有窗口」的黑洞情况 */
@@ -127,7 +190,7 @@ if (!gotLock) {
   app.on('second-instance', () => {
     if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
   });
-  app.whenReady().then(createWindow);
+  app.whenReady().then(async () => { await startEbctfServer(); createWindow(); });
 }
 
 app.on('window-all-closed', () => { app.quit(); });

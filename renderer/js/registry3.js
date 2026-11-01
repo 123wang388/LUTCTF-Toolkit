@@ -332,24 +332,23 @@
   });
 
   TOOLS.push({
-    id: 'ext-learn', name: '海丰杯备战指南', cat: 'ext', icon: '🎓', badge: 'LUT',
-    desc: '按甘肃省「海丰杯」高校网络安全技能大赛官方赛点拆解，附 K4L0NG 战队分工与比赛节奏建议',
-    tags: ['海丰杯', '考点', 'K4L0NG'], keywords: '海丰杯 考点 兰理工 k4long 准备',
+    id: 'ext-learn', name: '海丰杯备战指南', cat: 'ext', icon: '🎓', badge: '奇点',
+    desc: '按甘肃省「海丰杯」高校网络安全技能大赛官方赛点拆解，附奇点战队分工与比赛节奏建议',
+    tags: ['海丰杯', '考点', '奇点'], keywords: '海丰杯 考点 奇点 备战 分工',
     render(host) {
       const d = document.createElement('div');
       const groups = [...new Set(ExtLib.LEARN.map(x => x.g))];
       d.innerHTML =
         `<div class="w-hero"><h1>甘肃省「海丰杯」高校网络安全技能大赛</h1>
-          <p>面向兰州理工大学 K4L0NG 战队的针对性备战地图。大赛采用解题模式 CTF 赛制，综合考察
+          <p>面向奇点战队的针对性备战地图。大赛采用解题模式 CTF 赛制，综合考察
           <b>国产商用密码应用、工业信息安全、网络攻防渗透、数据取证逆向、应急响应</b> 五大方向。</p></div>` +
         groups.map(g => T.card(g, `<div class="grid-cards">${ExtLib.LEARN.filter(x => x.g === g).map(x =>
           `<div class="tcard"><h4>${esc(x.name)}</h4><p>${esc(x.desc)}</p></div>`).join('')}</div>`)).join('') +
-        T.card('兰州理工大学信息安全协会', `<div class="result">
-          <b>信息安全协会</b> · 创办于 2012 年，属计算机与通信学院，由冯涛老师指导<br>
-          <b>战队</b>：K4L0NG（另有「重明」队），近年获第五届陕西省网络空间安全技术大赛一等奖、
-          第十二届全国大学生信息安全竞赛西北赛区三等奖、第四届甘肃省网络安全攻防大赛第二名等荣誉<br>
-          <b>日常</b>：每周一次活动，授课覆盖 CTF 培训、网络安全基础；不定期举办校内 CTF<br>
-          <span style="color:var(--fg-mute)">※ 建议新人先从 Web + Misc 入门，配合本工具的「外部工具箱」与「在线资源」循序渐进。</span>
+        T.card('奇点战队', `<div class="result">
+          <b>战队</b>：奇点（Singularity）<br>
+          <b>方向</b>：Web / Crypto / Misc / Reverse / Pwn / 应急响应<br>
+          <b>备战</b>：按个人方向选择工具，赛前统一环境、字典和提交格式；赛中按题目节奏分工，不虚构荣誉，成绩以实际比赛为准。<br>
+          <span style="color:var(--fg-mute)">※ 建议新人先从 Web + Misc 入门，配合本工具的「工具启动台」与「在线资源」循序渐进。</span>
         </div>`);
       host.appendChild(d);
     }
@@ -363,8 +362,8 @@
       const d = document.createElement('div');
       d.innerHTML =
         `<div class="w-hero">
-          <h1>LUTCTF 工具合集 <span style="font-size:13px;color:var(--fg-mute);font-weight:400">v1.0</span></h1>
-          <p>兰州理工大学 K4L0NG 战队专用 · 为甘肃省「海丰杯」高校网络安全技能大赛打造的一体化解题工作台。</p>
+          <h1>奇点 CTF 工具合集 <span style="font-size:13px;color:var(--fg-mute);font-weight:400">v2.1</span></h1>
+          <p>奇点战队（Singularity）专用 · 为甘肃省「海丰杯」高校网络安全技能大赛打造的一体化解题工作台。</p>
         </div>` +
         T.card('设计原则', `<div class="result">
           <b>① 完全离线</b> —— 所有算法本地实现（含 MD5 / SM3 / SM4 / RSA / AES / LSB / FFT），不依赖任何外部 API，比赛断网可用；<br><br>
@@ -382,6 +381,12 @@
           • <b>应急响应</b>：Linux/Windows 排查清单、报告模板<br>
           • <b>外部整合</b>：本机工具箱一键唤起、在线资源导航、海丰杯备战指南
         </div>`) +
+        T.card('第三方组件', `<div class="result">
+          <b>EBCTFCodeBox</b> · Apache-2.0 · 811 函数 · <a href="#" id="ebNotice" style="color:var(--accent)">上游 GitHub</a><br>
+          <b>jsQR</b> · MIT · 离线二维码识别<br>
+          <b>Electron / electron-builder</b> · MIT · 运行时与打包<br>
+          完整来源、版本和修改说明见项目根目录 <code>THIRD_PARTY_NOTICES.md</code>。
+        </div>`) +
         T.card('免责声明', `<div class="result" style="border-color:var(--warn)">
           本工具仅供<b>网络安全学习、授权测试与正式竞赛</b>使用。请在法律允许范围内使用，<br>
           禁止用于未经授权的系统渗透、破坏或任何违法活动。作者不承担因滥用造成的任何责任。
@@ -392,6 +397,8 @@
           左上角 ⇅ 按钮 —— 窗口置顶（方便边做题边看资料）
         </div>`);
       host.appendChild(d);
+      const ebNotice = d.querySelector('#ebNotice');
+      if (ebNotice) ebNotice.onclick = e => { e.preventDefault(); App.ipc.openExternal('https://github.com/Henglie/EBCTFCodeBox'); };
     }
   });
 

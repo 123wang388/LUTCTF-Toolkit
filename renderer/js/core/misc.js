@@ -159,8 +159,8 @@ const Misc = (function () {
       'ip="x.x.x.0/24" && port="3306"', 'domain="edu.cn" && title="教务"', 'protocol="http" && country="CN"'],
     shodan: ['product:"thinkphp"', 'http.title:"Flask"', 'os:"Windows Server 2016"', 'port:6379 country:CN',
       'org:"China Education"', 'has_screenshot:true port:8080', 'ssl.cert.subject.cn:"edu.cn"'],
-    hunter: ['cert="兰州理工大学"', 'domain="lut.edu.cn"', 'ip="202.201.xx.0/24"'],
-    google: ['site:lut.edu.cn filetype:pdf', 'site:edu.cn intitle:"后台管理"', 'inurl:admin_login',
+    hunter: ['cert="Example University"', 'domain="example.edu.cn"', 'ip="192.168.0.0/24"'],
+    google: ['site:example.edu.cn filetype:pdf', 'site:edu.cn intitle:"后台管理"', 'inurl:admin_login',
       'filetype:sql "INSERT INTO"', 'site:edu.cn intext:"password" filetype:xls'],
     zoomeye: ['app:"Apache httpd" ver:"2.4.29"', 'device:"router" country:"China"']
   };

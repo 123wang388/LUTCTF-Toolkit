@@ -1,0 +1,384 @@
+/*
+ * fancy2.js — 花式 / CTF 编码 B 组（cat:'fancy'，冷门趣味）。
+ * BrainFuck（含 Ook!）、鲸语 Cetacean、兽音 Yygq、盲文 Braille
+ * 六十四卦 EightDiagram、当铺密码 Pawnshop。
+ *
+ * 算法来源：复刻自 WhatsInYourClipboard 的 ctfExtra.js / ctfCiphers.js /
+ * cnCiphers.js（ISC License，鸣谢 Leon406/ToolsFx）。编码表照抄源码，不许编造。
+ * 每个 encode/decode 都用往返测试验证（见 临时/rt_test_t8.mjs）。
+ *
+ * T8 卡剩余 5 项（Malbolge / 颜文字 / 社会主义核心价值观 / 云影 / 棋盘）
+ * 需查权威实现，本批次未做，回执标「待确认」。
+ */
+import { register } from "./registry.js";
+
+const te = (s) => [...new TextEncoder().encode(s)];
+const td = (b) => new TextDecoder("utf-8").decode(new Uint8Array(b));
+
+// ============ 内部 base64（八卦用，不依赖 atob/btoa 外部契约） ============
+const B64_DICT = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+function b64Encode(text) {
+  const bytes = te(text);
+  let bin = "";
+  for (const b of bytes) bin += String.fromCharCode(b);
+  return btoa(bin).replace(/=+$/, "");
+}
+function b64Decode(b64) {
+  const pad = b64.length % 4;
+  const s = pad ? b64 + "=".repeat(4 - pad) : b64;
+  const bin = atob(s);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return td(bytes);
+}
+
+// ============ BrainFuck + Ook!（照抄 ctfExtra.js，含步数上限） ============
+const BF_MAX_STEPS = 5_000_000;
+function brainfuckDecode(src, params = {}) {
+  let code = String(src).replace(/[^><+\-.,\[\]]/g, "");
+  // 预扫描配对括号。
+  // 宽容孤儿括号：无匹配的 ] 与多余 [ 一律当 NOP 忽略（与通行 BF 实现同款语义）。
+  // CTF 题面程序常有这类脏括号（前导干扰段），严格报错会把整段误判为「括号不匹配」。
+  const jump = {};
+  const stack = [];
+  let orphanClose = false;
+  for (let i = 0; i < code.length; i++) {
+    if (code[i] === "[") stack.push(i);
+    else if (code[i] === "]") {
+      if (stack.length) { const j = stack.pop(); jump[i] = j; jump[j] = i; }
+      else orphanClose = true;
+    }
+  }
+  // 多余的 [：同样不进 jump 表（等效匹配到程序尾）
+
+  let swapped = false;
+  if (params?.swapRerun !== false && orphanClose) {
+    // Select a structurally valid swapped program before execution, using one budget.
+    const pairs = { "-": "+", "+": "-", ">": "<", "<": ">", "]": "[", "[": "]", ",": ".", ".": "," };
+    const alternate = [...code].map(c => pairs[c]).join("");
+    const alternateJump = {};
+    const pending = [];
+    for (let i = 0; i < alternate.length; i++) {
+      if (alternate[i] === "[") pending.push(i);
+      else if (alternate[i] === "]") {
+        if (!pending.length) throw new Error("BrainFuck: 原程序与交换程序均存在不匹配括号");
+        const start = pending.pop();
+        alternateJump[start] = i; alternateJump[i] = start;
+      }
+    }
+    if (pending.length) throw new Error("BrainFuck: 原程序与交换程序均存在不匹配括号");
+    for (const key of Object.keys(jump)) delete jump[key];
+    Object.assign(jump, alternateJump);
+    code = alternate;
+    swapped = true;
+  }
+
+  const tape = new Uint8Array(30000);
+  let ptr = 0;
+  const out = [];
+  let steps = 0;
+  for (let ip = 0; ip < code.length; ip++) {
+    if (++steps > BF_MAX_STEPS) throw new Error("BrainFuck: 超过步数上限，可能是死循环");
+    switch (code[ip]) {
+      case ">": ptr = (ptr + 1) % 30000; break;
+      case "<": ptr = (ptr + 29999) % 30000; break;
+      case "+": tape[ptr] = (tape[ptr] + 1) & 0xff; break;
+      case "-": tape[ptr] = (tape[ptr] + 255) & 0xff; break;
+      case ".": out.push(tape[ptr]); break;
+      case ",": if (!swapped) tape[ptr] = 0; break; // 交换变体无输入源时保持当前格
+      case "[": if (tape[ptr] === 0) ip = jump[ip]; break;
+      case "]": if (tape[ptr] !== 0) ip = jump[ip]; break;
+    }
+  }
+  return td(out);
+}
+function brainfuckEncode(text) {
+  const bytes = te(text);
+  let out = "";
+  let cur = 0;
+  for (const b of bytes) {
+    let diff = b - cur;
+    if (diff > 128) diff -= 256;
+    else if (diff < -128) diff += 256;
+    out += (diff >= 0 ? "+" : "-").repeat(Math.abs(diff));
+    out += ".";
+    cur = b;
+  }
+  return out;
+}
+
+// Ook! —— BrainFuck 同构方言
+const OOK_MAP = {
+  "Ook. Ook?": ">", "Ook? Ook.": "<", "Ook. Ook.": "+", "Ook! Ook!": "-",
+  "Ook! Ook.": ".", "Ook. Ook!": ",", "Ook! Ook?": "[", "Ook? Ook!": "]",
+};
+const BF_TO_OOK = Object.fromEntries(Object.entries(OOK_MAP).map(([k, v]) => [v, k]));
+function ookDecode(src) {
+  const toks = String(src).match(/Ook[.?!]/g) || [];
+  if (toks.length % 2 !== 0) throw new Error("Ook!: token 数须为偶数");
+  let bf = "";
+  for (let i = 0; i < toks.length; i += 2) {
+    const pair = toks[i] + " " + toks[i + 1];
+    const cmd = OOK_MAP[pair];
+    if (!cmd) throw new Error("Ook!: 非法组合 " + pair);
+    bf += cmd;
+  }
+  return brainfuckDecode(bf, { swapRerun: false });
+}
+function ookEncode(text) {
+  return [...brainfuckEncode(text)].map((c) => BF_TO_OOK[c]).filter(Boolean).join(" ");
+}
+
+// ============ 鲸语 Cetacean（照抄 ctfCiphers.js cetaceanDecode + 补 encode） ============
+// 16 位二进制，1->e, 0->E。decode 每位 16 位 -> 1 charCode，encode 反向。
+function cetaceanEncode(text) {
+  let out = "";
+  for (const ch of text) {
+    const code = ch.codePointAt(0);
+    if (code > 0xffff) throw new Error("鲸语: 字符超出 BMP 范围 " + ch);
+    const bin = code.toString(2).padStart(16, "0");
+    out += bin.replace(/1/g, "e").replace(/0/g, "E");
+  }
+  return out;
+}
+function cetaceanDecode(text) {
+  const s = text.replace(/\s/g, "");
+  const chunks = s.match(/.{16}/g) || [];
+  return chunks.map((ch) => {
+    const bin = ch.replace(/e/g, "1").replace(/E/g, "0");
+    return String.fromCharCode(parseInt(bin, 2));
+  }).join("");
+}
+
+// ============ 兽音 Yygq（照抄 ctfExtra.js，token 含空格，split 须匹配） ============
+const YYGQ_ORIG = ["就 这 ¿ ", "不 会 吧 ？ "];
+function yygqEncode(text) {
+  let bits = "";
+  for (const ch of text) {
+    const code = ch.codePointAt(0);
+    if (code > 0xffff) {
+ // 补充平面字符拆成代理对，各自 16 位（原版直接用 17 位会与 decode 的 16 位 payload 错位）
+      const high = 0xd800 + ((code - 0x10000) >> 10);
+      const low = 0xdc00 + ((code - 0x10000) & 0x3ff);
+      bits += "1" + high.toString(2).padStart(16, "0");
+      bits += "1" + low.toString(2).padStart(16, "0");
+    } else if (code < 127) {
+      bits += "0" + code.toString(2).padStart(8, "0");
+    } else {
+      bits += "1" + code.toString(2).padStart(16, "0");
+    }
+  }
+  return [...bits].map((b) => YYGQ_ORIG[+b]).join("");
+}
+function yygqDecode(text) {
+  // ⚠ 健壮 decode：只认每个 token 的首字（"就"=0 / "不"=1），忽略其他所有字符。
+  // 根因链——① YYGQ_ORIG token 末尾带空格（"就 这 ¿ "），旧 decode split 依赖尾空格；
+  // 一键解码 runOneKey 对输入 text.trim() 删掉末尾空格 → 末 token 匹配不上 → 漏 1 bit
+  // → 末字符错位（"}"=0111101 → ">"=0111110）。② 标点 ¿/？ 有 Unicode 全/半角变体，
+  // 复制/传输后 split 整 token 会失配。改为只扫 就/不 首字：每个 token 有且仅有一个，
+  // 按出现顺序即 bit 流，天然免疫空格、标点变体、尾空格 trim。
+  let bits = "";
+  for (const ch of text) {
+    if (ch === "就") bits += "0";
+    else if (ch === "不") bits += "1";
+  }
+  let i = 0, out = "";
+  while (i < bits.length) {
+    // 标志位 0 → 后随 8 bit（ASCII）；1 → 后随 16 bit（BMP/代理）。
+    // 末尾残尾保护：剩余 bit 不足一个完整字符（复制漏了 token、串被截断）就丢弃残尾，
+    // 不硬读越界 slice——否则 parseInt 拿短串解出错误值，吐 ">" + " " 类垃圾尾
+    // （实测 flag{bbooxxx} 漏抄末尾一个 "就这¿" → "}" 被解成 ">"）。
+    const need = bits[i] === "0" ? 9 : 17;
+    if (i + need > bits.length) break;
+    const payload = bits.slice(i + 1, i + need);
+    out += String.fromCharCode(parseInt(payload, 2));
+    i += need;
+  }
+  return out;
+}
+
+// ============ 盲文 Braille（照抄 ctfCiphers.js brailleDecode + 补 encode） ============
+// BRAILLE_DICT: idx -> 盲文字符，decode 时 c -> String.fromCharCode(idx + 32)
+const BRAILLE_DICT =
+  "⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⡰⡱⡲⡳⡴⡵⡶⡷⡸⡹⡺⡻⡼⡽⡾⡿⡠⡡⡢⡣⡤⡥⡦⡧⡨⡩⡪⡫⡬⡭⡮⡯⡐⡑⡒⡓⡔⡕⡖⡗⡘⡙⡚⡛⡜⡝⡞⡟⡀⡁⡂⡃⡄⡅⡆⡇⡈⡉⡊⡋⡌⡍⡎";
+function brailleDecode(text) {
+  return [...text]
+    .filter((c) => c !== "=")
+    .map((c) => {
+      const idx = BRAILLE_DICT.indexOf(c);
+      return idx === -1 ? c : String.fromCharCode(idx + 32);
+    })
+    .join("");
+}
+function brailleEncode(text) {
+  return [...text].map((ch) => {
+    const idx = ch.charCodeAt(0) - 32;
+    if (idx < 0 || idx >= BRAILLE_DICT.length) return ch;
+    return BRAILLE_DICT[idx];
+  }).join("");
+}
+
+// NABCC 标准 6 点映射（North American Braille Computer Code，照抄 CyberChef Braille.mjs
+// BRAILLE_LOOKUP）。与上面 BRAILLE_DICT（乱序字典）不同源，作为 mapping 参数第二套码表。
+const BRAILLE_NABCC_ASCII = " A1B'K2L@CIF/MSP\"E3H9O6R^DJG>NTQ,*5<-U8V.%[$+X!&;:4\\0Z7(_?W]#Y)=";
+const BRAILLE_NABCC_DOT6  = "⠀⠁⠂⠃⠄⠅⠆⠇⠈⠉⠊⠋⠌⠍⠎⠏⠐⠑⠒⠓⠔⠕⠖⠗⠘⠙⠚⠛⠜⠝⠞⠟⠠⠡⠢⠣⠤⠥⠦⠧⠨⠩⠪⠫⠬⠭⠮⠯⠰⠱⠲⠳⠴⠵⠶⠷⠸⠹⠺⠻⠼⠽⠾⠿";
+const BRAILLE_NABCC_ENC = {};
+const BRAILLE_NABCC_DEC = {};
+for (let i = 0; i < BRAILLE_NABCC_ASCII.length; i++) {
+  BRAILLE_NABCC_ENC[BRAILLE_NABCC_ASCII[i]] = BRAILLE_NABCC_DOT6[i];
+  BRAILLE_NABCC_DEC[BRAILLE_NABCC_DOT6[i]] = BRAILLE_NABCC_ASCII[i];
+}
+function brailleNabccEncode(text) {
+ // 标准 Braille ASCII 为大写表示，字母统一转大写后映射；其余字符原样透传。
+  return [...String(text)].map((ch) => {
+    const up = (ch >= "a" && ch <= "z") ? ch.toUpperCase() : ch;
+    return BRAILLE_NABCC_ENC[up] !== undefined ? BRAILLE_NABCC_ENC[up] : ch;
+  }).join("");
+}
+function brailleNabccDecode(text) {
+  return [...String(text)].map((ch) => {
+    const m = BRAILLE_NABCC_DEC[ch];
+    return m !== undefined ? m : ch;
+  }).join("");
+}
+
+// ============ 六十四卦 EightDiagram（照抄 ctfExtra.js） ============
+const EIGHT = [
+  "坤","剥","比","观","豫","晋","萃","否","谦","艮","蹇","渐","小过","旅","咸","遁",
+  "师","蒙","坎","涣","解","未济","困","讼","升","蛊","井","巽","恒","鼎","大过","姤",
+  "复","颐","屯","益","震","噬嗑","随","无妄","明夷","贲","既济","家人","丰","离","革","同人",
+  "临","损","节","中孚","归妹","睽","兑","履","泰","大畜","需","小畜","大壮","大有","夬","乾",
+];
+function eightDiagramEncode(text) {
+  const b64 = b64Encode(text);
+  return [...b64].map((c) => EIGHT[B64_DICT.indexOf(c)]).join("");
+}
+function eightDiagramDecode(text) {
+ // 贪婪切分卦象 token（含两字卦名如"小过"）
+  const tokens = [];
+  let tmp = "";
+  for (const c of text) {
+    if (EIGHT.includes(tmp + c)) { tokens.push(tmp + c); tmp = ""; }
+    else tmp += c;
+  }
+  const b64 = tokens.map((t) => B64_DICT[EIGHT.indexOf(t)]).join("");
+  return b64Decode(b64);
+}
+
+// ============ 当铺密码 Pawnshop（照抄 cnCiphers.js pawnshopDecode + 补 encode） ============
+// PAWN: 汉字 -> 数字。每字符 charCode 的各位数字 -> 对应汉字。
+const PAWN = {
+  目: 0, 口: 0, 凹: 0, 凸: 0, 田: 0, 由: 1, 中: 2, 人: 3, 入: 3, 古: 3,
+  工: 4, 互: 4, 果: 5, 克: 5, 尔: 5, 土: 5, 大: 5, 木: 6, 王: 6, 夫: 7,
+  主: 7, 井: 8, 关: 8, 丰: 8, 并: 8, 圭: 9, 羊: 9,
+};
+// 反向表：数字 -> 第一个对应汉字（一个数字可能多汉字，取代表）
+const PAWN_REV = {};
+for (const [ch, d] of Object.entries(PAWN)) {
+  if (!(d in PAWN_REV)) PAWN_REV[d] = ch;
+}
+function pawnshopEncode(text) {
+  return [...text].map((ch) => {
+    const code = ch.charCodeAt(0);
+    const digits = String(code);
+    return [...digits].map((d) => PAWN_REV[d] ?? d).join("");
+  }).join(" ");
+}
+function pawnshopDecode(text) {
+  return text
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((word) => {
+      let digits = "";
+      for (const ch of word) {
+        if (!(ch in PAWN)) throw new Error("非当铺字符: " + ch);
+        digits += PAWN[ch];
+      }
+      return String.fromCharCode(parseInt(digits, 10));
+    })
+    .join("");
+}
+
+// ---- 注册 ----
+register({
+  id: "brainfuck", cat: "esolang", name: "BrainFuck", desc: "8 指令 BF（执行/生成，步数上限 500 万；默认兼容括号反向的字符交换题）",
+  params: [{ key: "swapRerun", label: "兼容字符交换变体", type: "bool", default: true }],
+  encode: brainfuckEncode, decode: brainfuckDecode,
+  detect: (t) => (/^[+\-<>,.\[\]\s]+$/.test(t.trim()) && /[+\-<>,.\[\]]/.test(t) && t.trim().length >= 2 ? 0.5 : 0),
+});
+
+register({
+  id: "ook", cat: "fancy", name: "Ook!", desc: "BrainFuck 方言（Ook. Ook? Ook! 三 token）",
+  encode: ookEncode, decode: ookDecode,
+  detect: (t) => (/Ook[.?!]/.test(t) ? 0.6 : 0),
+});
+
+register({
+  id: "cetacean", cat: "fancy", name: "鲸语 Cetacean", desc: "16 位二进制（1->e, 0->E）",
+  encode: cetaceanEncode, decode: cetaceanDecode,
+  detect: (t) => (/^[eE\s]+$/.test(t.trim()) && /[eE]/.test(t) && t.trim().length >= 16 ? 0.4 : 0),
+});
+
+register({
+  id: "yygq", cat: "fancy", name: "兽音译者", desc: "就这¿ / 不会吧？ 比特流编码",
+  encode: yygqEncode, decode: yygqDecode,
+  // token 是 "就 这 ¿ " / "不 会 吧 ？ "（YYGQ_ORIG 字符间含空格）→ detect 必须容忍字符间空白，
+  // 否则永远匹配不到自己的 encode 产物（漏认，magic 不尝试）。\s* 兼容连写与空格分隔两种输入。
+  detect: (t) => (/就\s*这|不\s*会\s*吧/.test(t) ? 0.6 : 0),
+});
+
+// auto 判据：乱序字典把字母映射到「带 7 点」的 U+2840-U+28FF 区；NABCC 标准只用纯 6 点
+// 的 U+2800-U+283F。因此密文里只要出现 7/8 点就必然是乱序字典，否则按标准码表解。
+function brailleIsRawDict(text) {
+  return /[\u2840-\u28FF]/.test(String(text));
+}
+register({
+  id: "braille", cat: "fancy", name: "盲文 Braille", desc: "U+2800 块 ↔ ASCII（auto 自动判码表 / nabcc 标准 6 点 / raw 乱序字典）",
+  params: [
+    { key: "mapping", label: "码表", type: "select", default: "auto",
+      options: [
+        { value: "auto", label: "自动（编码用标准，解码自适应）" },
+        { value: "nabcc", label: "NABCC 标准" },
+        { value: "raw", label: "原始（乱序字典）" },
+      ] },
+  ],
+  encode: (t, p) => ((p && p.mapping) === "raw" ? brailleEncode(t) : brailleNabccEncode(t)),
+  decode: (t, p) => {
+    const m = (p && p.mapping) || "auto";
+    if (m === "raw") return brailleDecode(t);
+    if (m === "nabcc") return brailleNabccDecode(t);
+    return brailleIsRawDict(t) ? brailleDecode(t) : brailleNabccDecode(t);
+  },
+  detect: (t) => (/[\u2800-\u28FF⡀-⡯]/.test(t) ? 0.5 : 0),
+});
+
+register({
+  id: "eightdiagram", cat: "fancy", name: "六十四卦", desc: "base64 → 64 卦象映射",
+  encode: eightDiagramEncode, decode: eightDiagramDecode,
+  detect: (t) => {
+    const chinese = t.replace(/[^\u4e00-\u9fff]/g, "");
+    if (!chinese) return 0;
+    return chinese.length >= 2 && /坤|乾|否|泰|既济|未济|小过|大过|中孚|归妹/.test(chinese) ? 0.4 : 0;
+  },
+});
+
+register({
+  id: "pawnshop", cat: "cn", name: "当铺密码", desc: "汉字出头封闭区域数 ↔ 数字（当铺密码经典版）",
+  encode: pawnshopEncode, decode: pawnshopDecode,
+  detect: (t) => {
+    const chars = t.replace(/\s/g, "");
+    if (!chars) return 0;
+    const allPawn = [...chars].every((c) => c in PAWN);
+    return allPawn && chars.length >= 1 ? 0.3 : 0;
+  },
+});
+
+export {
+  brainfuckEncode, brainfuckDecode, ookEncode, ookDecode, OOK_MAP,
+  cetaceanEncode, cetaceanDecode,
+  yygqEncode, yygqDecode, YYGQ_ORIG,
+  brailleEncode, brailleDecode, BRAILLE_DICT,
+  eightDiagramEncode, eightDiagramDecode, EIGHT,
+  pawnshopEncode, pawnshopDecode, PAWN, PAWN_REV,
+};

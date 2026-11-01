@@ -1,0 +1,225 @@
+/* exhaustiveView.css — 穷举全解视图（M3 温和红，对齐同类实现 flag 高亮） */
+
+.exhaust-view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+}
+
+.exhaust-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+.exhaust-input.dragover {
+  border-color: var(--primary);
+  background: var(--surface-hi);
+}
+
+/* 工具栏 */
+.exhaust-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.exhaust-switch-label {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  font-size: var(--fs-base);
+  color: var(--on-surface-var);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.exhaust-stat {
+  font-size: var(--fs-sm);
+  color: var(--on-surface-var);
+  min-height: 1.2em;
+}
+
+.exhaust-out {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+/* 分类分组 */
+.exhaust-cat {
+  border: 1px solid var(--outline-var);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  background: var(--surface-1);
+}
+.exhaust-cat-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--sp-2) var(--sp-3);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--outline-var);
+  cursor: pointer;
+  list-style: none;
+}
+.exhaust-cat-head::-webkit-details-marker { display: none; }
+.exhaust-cat-head::before {
+  content: "";
+  width: 0; height: 0;
+  border-left: 5px solid currentColor;
+  border-top: 4px solid transparent;
+  border-bottom: 4px solid transparent;
+  color: var(--on-surface-var);
+  margin-inline-end: var(--sp-2);
+  transition: transform var(--dur-short) var(--ease);
+}
+.exhaust-cat[open] > .exhaust-cat-head::before { transform: rotate(90deg); }
+.exhaust-cat-head .exhaust-cat-name { flex: 1; }
+.exhaust-cat-head:hover { background: var(--surface-hi); }
+.exhaust-cat-name {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--on-surface-var);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.exhaust-cat-count {
+  font-size: var(--fs-xs);
+  color: var(--on-surface-var);
+  opacity: .7;
+}
+
+/* 结果行：解码器名 : 结果 */
+.exhaust-row {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  padding: 6px var(--sp-3);
+  font-size: var(--fs-base);
+  line-height: 1.5;
+  cursor: pointer;
+  border-bottom: 1px solid color-mix(in srgb, var(--outline-var) 40%, transparent);
+  transition: background var(--dur-short) var(--ease);
+}
+.exhaust-row:last-child { border-bottom: none; }
+.exhaust-row:hover { background: var(--surface-hi); }
+
+.exhaust-op {
+  flex: none;
+  min-width: 128px;
+  max-width: 200px;
+  color: var(--primary);
+  font-weight: 600;
+  word-break: break-word;
+}
+.exhaust-sep { flex: none; color: var(--on-surface-var); opacity: .5; }
+.exhaust-val {
+  flex: 1;
+  font-family: var(--mono);
+  color: var(--on-surface);
+  word-break: break-all;
+  white-space: pre-wrap;
+}
+.exhaust-val.garbage { color: var(--on-surface-var); opacity: .55; }
+.exhaust-err-val { color: var(--error); opacity: .8; font-style: italic; }
+.exhaust-row.err { cursor: default; }
+.exhaust-row.err:hover { background: transparent; }
+
+/* 算法折叠卡（合并卡）标题区：独立占一行的头部容器 + 折叠指示箭头 + 计数胶囊 */
+.exhaust-algo { border-top: 1px solid var(--outline-var); }
+.exhaust-algo:first-of-type { border-top: none; }
+.exhaust-algo-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+  min-height: 52px;
+  padding: var(--sp-3) var(--sp-4);
+  cursor: pointer;
+  background: var(--surface-1);
+  list-style: none;
+  transition: background var(--dur-short) var(--ease);
+}
+.exhaust-algo-head::-webkit-details-marker { display: none; }
+.exhaust-algo-head:hover { background: var(--surface-hi); }
+.exhaust-algo[open] > .exhaust-algo-head {
+  background: var(--surface-2);
+  box-shadow: inset 0 -1px 0 var(--outline-var);
+}
+.exhaust-algo-name {
+  flex: 1 1 240px;
+  min-width: 0;
+  font-size: var(--fs-base);
+  font-weight: 600;
+  color: var(--on-surface);
+  overflow-wrap: anywhere;
+}
+.exhaust-algo-meta {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--fs-xs);
+  color: var(--on-surface-var);
+  background: var(--field-bg);
+  border: 1px solid var(--outline-var);
+  border-radius: var(--r-sm);
+  padding: 3px 10px;
+  overflow-wrap: anywhere;
+}
+.exhaust-algo-meta.hit { color: var(--primary); border-color: var(--primary); }
+.exhaust-algo-head::after {
+  content: "";
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--on-surface-var);
+  border-bottom: 2px solid var(--on-surface-var);
+  transform: rotate(-45deg);
+  transition: transform var(--dur-short) var(--ease);
+}
+.exhaust-algo[open] > .exhaust-algo-head::after { transform: rotate(45deg); }
+.exhaust-algo-body { border-top: 1px solid color-mix(in srgb, var(--outline-var) 40%, transparent); }
+
+/* flag 三档高亮（照同类工具 highlight_text）：
+   flag-hit  = 关键词命中（黄底红字）
+   flag-format = 完整 flag{...}（金底加粗，最显眼） */
+.exhaust-row.flag-hit .exhaust-val {
+  background: color-mix(in srgb, var(--flag-hit) 30%, transparent);
+  color: var(--error);
+  font-weight: 600;
+  padding: 0 4px;
+  border-radius: var(--r-xs);
+}
+.exhaust-row.flag-format {
+  background: color-mix(in srgb, var(--flag-format) 14%, transparent);
+}
+.exhaust-row.flag-format .exhaust-val {
+  background: color-mix(in srgb, var(--flag-format) 40%, transparent);
+  color: #7a4b00;  /* 亮色 flag-format 文字色（深棕对比色），暂无 --on-flag-format 令牌，保留硬编码待后续补 */
+  font-weight: 700;
+  padding: 0 4px;
+  border-radius: var(--r-xs);
+}
+[data-theme="dark"] .exhaust-row.flag-format .exhaust-val {
+  color: var(--flag-hit);  /* 暗色 flag-format 文字色，原 #ffe082 = 暗色 --flag-hit 值，令牌化 */
+  background: color-mix(in srgb, var(--flag-format) 24%, transparent);
+}
+
+.exhaust-empty {
+  padding: var(--sp-4);
+  text-align: center;
+  color: var(--on-surface-var);
+  font-size: var(--fs-base);
+}
+
+/* ============ 窄屏（<860px 与全站断点对齐）：op 名收窄，结果值多让位 ============ */
+@media (max-width: 860px) {
+  .exhaust-op { min-width: 0; max-width: 140px; }
+  .exhaust-row { padding: 6px var(--sp-2); }
+}
+
+/* ============ 低高窗口（<640px 高）：行距压缩 ============ */
+@media (max-height: 640px) {
+  .exhaust-row { padding: 4px var(--sp-2); }
+}

@@ -1,0 +1,238 @@
+/*
+ * primeGen.js — 大素数生成 + 素性检验（P1，cat:'radix'）。
+ *
+ * 算法：Miller-Rabin 概率素性检验（确定性版本，对 n < 3.3e24 用前 13 个质数做 witness 足够）。
+ * 生成：随机奇数 → Miller-Rabin → 不通过则 +2 重试，直到找到素数。
+ *
+ * 红线：
+ * - 算法照 FIPS 186-4/Draft FIPS 186-5 + RFC 8017 Section B.1.1 实现，不编造。
+ * - 随机源用 crypto.getRandomValues（浏览器 CSPRNG），不用 Math.random。
+ * - 零外发：纯本地计算。
+ * - core 层零 UI 依赖（仅 registry）。
+ *
+ * 契约：register({id, cat:"radix", name, desc, params, run})。
+ * run 单向，输入忽略，参数 bits/count，输出素数十进制列表（每行一个）。
+ */
+import { register } from "./registry.js";
+import { randomBytes as randBytes } from "./randSource.js"; // 统一随机源（默认档 system 逐字节零回归）
+
+// ============================================================
+// Miller-Rabin 素性检验（确定性版本）
+// ============================================================
+
+// 对 n < 3,317,044,064,679,887,385,961,981，用以下 13 个质数做 witness 足够确定性判定
+const MR_WITNESSES = [2n, 3n, 5n, 7n, 11n, 13n, 17n, 19n, 23n, 29n, 31n, 37n, 41n];
+
+/**
+ * 模幂 (base^exp) mod m — BigInt 快速幂
+ */
+function modPow(base, exp, m) {
+  if (m === 1n) return 0n;
+  let result = 1n;
+  base = base % m;
+  if (base < 0n) base += m;
+  while (exp > 0n) {
+    if (exp & 1n) result = (result * base) % m;
+    exp >>= 1n;
+    base = (base * base) % m;
+  }
+  return result;
+}
+
+/**
+ * Miller-Rabin 单轮检验
+ * @returns true=可能是素数, false=合数
+ */
+function millerRabinRound(n, a, d, r) {
+ // x = a^d mod n
+  let x = modPow(a, d, n);
+  if (x === 1n || x === n - 1n) return true;
+  for (let i = 0n; i < r - 1n; i++) {
+    x = (x * x) % n;
+    if (x === n - 1n) return true;
+  }
+  return false;
+}
+
+/**
+ * 确定性 Miller-Rabin 素性检验
+ * 对 n < 3.3e24 用 13 个 witness 做确定性判定（FIPS 186-4 Table C.2）
+ * 对更大的 n，仍用这 13 个 witness（误判概率 < 4^-13 ≈ 1.5e-8，CTF 足够）
+ * @param {bigint} n 待检整数（奇数，>2）
+ * @returns {boolean} true=素数, false=合数
+ */
+function isProbablePrime(n) {
+  if (n < 2n) return false;
+  if (n === 2n || n === 3n) return true;
+  if (n % 2n === 0n) return false;
+ // 分解 n-1 = d * 2^r
+  let d = n - 1n;
+  let r = 0n;
+  while (d % 2n === 0n) {
+    d >>= 1n;
+    r++;
+  }
+  for (const a of MR_WITNESSES) {
+    if (a >= n) continue; // witness 不能 >= n
+    if (!millerRabinRound(n, a, d, r)) return false;
+  }
+  return true;
+}
+
+// ============================================================
+// 大素数生成
+// ============================================================
+
+/**
+ * 生成指定位数的随机奇数
+ * @param {number} bits 位数
+ * @returns {bigint} 随机奇数，最高位和最低位置 1
+ */
+function randomOddBigInt(bits) {
+  if (bits < 2) throw new Error("位数至少 2");
+  const bytes = Math.ceil(bits / 8);
+  const buf = new Uint8Array(bytes);
+  buf.set(randBytes(buf.length));
+ // 转为 BigInt
+  let n = 0n;
+  for (const b of buf) n = (n << 8n) | BigInt(b);
+ // 截断到指定位数
+  const mask = (1n << BigInt(bits)) - 1n;
+  n &= mask;
+ // 最高位置 1（确保位数）、最低位置 1（确保奇数）
+  n |= (1n << BigInt(bits - 1));
+  n |= 1n;
+  return n;
+}
+
+/**
+ * 生成一个大素数
+ * @param {number} bits 位数
+ * @returns {bigint} 素数
+ */
+function generatePrime(bits) {
+  if (bits < 2) throw new Error("位数至少 2");
+  if (bits === 2) return 3n; // 唯一的 2 位素数（奇数）
+  let candidate = randomOddBigInt(bits);
+  let attempts = 0;
+  const maxAttempts = bits * 50; // 安全阀，避免极端情况死循环
+  while (!isProbablePrime(candidate)) {
+    candidate += 2n;
+ // 若超出位数范围，重新生成
+    if (candidate >= (1n << BigInt(bits))) {
+      candidate = randomOddBigInt(bits);
+    }
+    attempts++;
+    if (attempts > maxAttempts) {
+      throw new Error(`在 ${maxAttempts} 次尝试内未找到 ${bits} 位素数（极罕见，请重试）`);
+    }
+  }
+  return candidate;
+}
+
+// ============================================================
+// op 注册
+// ============================================================
+register({
+  id: "primeGen", cat: "radix", name: "大素数生成",
+  desc: "Miller-Rabin 检验生成指定位数的大素数（确定性版本，crypto CSPRNG）（素性检验用 primeTest，四则/分解用 bigCalc）",
+  params: [
+    { key: "bits", label: "位数", type: "number", default: 64, placeholder: "2..1024 位" },
+    { key: "count", label: "数量", type: "number", default: 1, placeholder: "生成几个" },
+  ],
+  run: (_text, p) => {
+    const bits = Math.max(2, Math.min(1024, Number(p?.bits) || 64));
+    const count = Math.max(1, Math.min(100, Number(p?.count) || 1));
+    const primes = [];
+    for (let i = 0; i < count; i++) {
+      primes.push(generatePrime(bits).toString(10));
+    }
+    return primes.join("\n");
+  },
+});
+
+// ============================================================
+// 素性检验 op（批E2 追加：不动上方任何既有逻辑/导出）
+// ============================================================
+
+// 前 64 个质数（第 64 个 = 311），供 n 超过确定性界后按轮数取固定基。
+const FIRST_64_PRIMES = [
+  2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53,
+  59, 61, 67, 71, 73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131,
+  137, 139, 149, 151, 157, 163, 167, 173, 179, 181, 191, 193, 197, 199, 211, 223,
+  227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281, 283, 293, 307, 311,
+];
+
+// 13 个固定质数 witness（2..41）的确定性判定上界（FIPS 186-4 Table C.2）：
+// n < 3,317,044,064,679,887,385,961,981 时上方 MR_WITNESSES 足以确定性判素/合。
+const MR_DETERMINISTIC_BOUND = 3317044064679887385961981n;
+
+/**
+ * 轮数化 Miller-Rabin（primeTest op 用）：
+ * - n < MR_DETERMINISTIC_BOUND：直接走 isProbablePrime（13 个固定质数 witness，
+ *   确定性判定，FIPS 186-4 Table C.2）。
+ * - 更大 n：取前 t 个小质数为固定基逐轮检验。轮数依据 FIPS 186-5 Appendix B
+ *   （t 轮随机基误判概率 <= 4^-t；固定小质数基为工程惯例）。
+ * @param {bigint} n
+ * @param {number} t 轮数，1..64
+ * @returns {boolean} true=可能是素数（小数为确定性）, false=合数
+ */
+function isProbablePrimeRounds(n, t) {
+  if (n < 2n) return false;
+  if (n === 2n || n === 3n) return true;
+  if (n % 2n === 0n) return false;
+  if (n < MR_DETERMINISTIC_BOUND) return isProbablePrime(n);
+ // 分解 n-1 = d * 2^r
+  let d = n - 1n;
+  let r = 0n;
+  while (d % 2n === 0n) {
+    d >>= 1n;
+    r++;
+  }
+  const bases = FIRST_64_PRIMES.slice(0, Math.max(1, Math.min(64, t)));
+  for (const a of bases) {
+    const ab = BigInt(a);
+    if (ab >= n) continue; // witness 不能 >= n
+    if (!millerRabinRound(n, ab, d, r)) return false;
+  }
+  return true;
+}
+
+register({
+  id: "primeTest", cat: "radix", name: "素性检验（Miller-Rabin）",
+  desc: "判定大整数是否素数并给出位长与轮数说明：n < 3.3e24 用 13 个固定质数 witness 确定性判定（FIPS 186-4 Table C.2），更大 n 按轮数（FIPS 186-5 App. B，随机基误判 < 4^-rounds）",
+  params: [
+    { key: "n", label: "n（十进制大整数）", type: "text", default: "",
+      placeholder: "如 2305843009213693951（2^61-1）" },
+    { key: "rounds", label: "Miller-Rabin 轮数", type: "number", default: 24,
+      placeholder: "1..64（n >= 3.3e24 时生效）" },
+  ],
+  run: (_text, p) => {
+    const raw = String(p?.n ?? "").trim();
+    if (!raw) throw new Error("参数 n 不能为空（十进制大整数）");
+    const cleaned = raw.replace(/[\s,　_]/g, "");
+    if (!/^[+-]?\d+$/.test(cleaned)) throw new Error(`n 不是合法十进制整数：${raw.slice(0, 64)}`);
+    const n = BigInt(cleaned);
+    const t = Math.max(1, Math.min(64, Math.floor(Number(p?.rounds) || 24)));
+    const neg = n < 0n;
+    const absN = neg ? -n : n;
+    const bl = absN === 0n ? 0 : absN.toString(2).length;
+    const lines = [];
+    if (neg || absN < 2n) {
+      lines.push(`判定：非素数（${neg ? "负数" : "n < 2"}）`);
+      lines.push(`位长：${bl} 位（二进制${neg ? "，负数按 |n| 计" : ""}）`);
+      lines.push("方法：定义直接判定（素数需 n >= 2，此处不涉及 Miller-Rabin）");
+      return lines.join("\n");
+    }
+    const isP = isProbablePrimeRounds(absN, t);
+    const deterministic = absN < MR_DETERMINISTIC_BOUND;
+    lines.push(`判定：${isP ? "素数" : "合数"}`);
+    lines.push(`位长：${bl} 位（二进制）`);
+    lines.push(deterministic
+      ? `方法：Miller-Rabin 13 轮确定性判定（n < 3,317,044,064,679,887,385,961,981 时 13 个固定质数 witness 足以确定，FIPS 186-4 Table C.2）`
+      : `方法：Miller-Rabin ${t} 轮（随机基误判概率 < 4^-${t}，FIPS 186-5 App. B；本实现取前 ${t} 个小质数为固定基）`);
+    return lines.join("\n");
+  },
+});
+
+export { isProbablePrime, generatePrime, modPow };
