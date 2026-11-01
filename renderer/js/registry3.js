@@ -340,7 +340,7 @@
       const groups = [...new Set(ExtLib.LEARN.map(x => x.g))];
       d.innerHTML =
         `<div class="w-hero"><h1>甘肃省「海丰杯」高校网络安全技能大赛</h1>
-          <p>面向奇点战队的针对性备战地图。大赛采用解题模式 CTF 赛制，综合考察
+          <p>面向 LUT 信息安全协会 · 奇点战队的针对性备战地图。大赛采用解题模式 CTF 赛制，综合考察
           <b>国产商用密码应用、工业信息安全、网络攻防渗透、数据取证逆向、应急响应</b> 五大方向。</p></div>` +
         groups.map(g => T.card(g, `<div class="grid-cards">${ExtLib.LEARN.filter(x => x.g === g).map(x =>
           `<div class="tcard"><h4>${esc(x.name)}</h4><p>${esc(x.desc)}</p></div>`).join('')}</div>`)).join('') +
@@ -362,8 +362,8 @@
       const d = document.createElement('div');
       d.innerHTML =
         `<div class="w-hero">
-          <h1>奇点 CTF 工具合集 <span style="font-size:13px;color:var(--fg-mute);font-weight:400">v2.1</span></h1>
-          <p>奇点战队（Singularity）专用 · 为甘肃省「海丰杯」高校网络安全技能大赛打造的一体化解题工作台。</p>
+          <h1>LUTCTF 工具合集 <span style="font-size:13px;color:var(--fg-mute);font-weight:400">v2.1.1</span></h1>
+          <p>LUT 信息安全协会 · 奇点战队（Singularity）专用 · 为甘肃省「海丰杯」高校网络安全技能大赛打造的一体化解题工作台。</p>
         </div>` +
         T.card('设计原则', `<div class="result">
           <b>① 完全离线</b> —— 所有算法本地实现（含 MD5 / SM3 / SM4 / RSA / AES / LSB / FFT），不依赖任何外部 API，比赛断网可用；<br><br>

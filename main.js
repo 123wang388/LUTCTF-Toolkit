@@ -1,6 +1,6 @@
 /* ============================================================
    main.js — Electron 主进程
-   奇点战队 · CTF 工具合集
+   LUT 信息安全协会 · 奇点战队 · CTF 工具合集
    ============================================================ */
 const path = require('path');
 const http = require('http');
@@ -167,7 +167,7 @@ function createWindow() {
 
   /* 开发环境快捷键（可选） */
   win.webContents.on('did-finish-load', () => {
-    win.setTitle('奇点 CTF 工具合集 · 奇点战队');
+    win.setTitle('LUTCTF 工具合集 · 奇点战队');
   });
 
   /* 加载失败兜底：避免出现「进程在跑但没有窗口」的黑洞情况 */

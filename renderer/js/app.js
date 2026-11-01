@@ -156,9 +156,9 @@ const App = (function () {
       `<div class="welcome-inner">
         <div class="welcome-head">
           <div class="wh-main">
-            <div class="eyebrow">SINGULARITY · CTF</div>
-            <h1>工具合集 <span>v2.1</span></h1>
-            <p>面向奇点战队与甘肃省“海丰杯”的离线解题工作台。收录编解码、密码学、隐写、取证、Web、二进制与应急响应，全部本地运行。</p>
+            <div class="eyebrow">LUT · SINGULARITY</div>
+            <h1>LUTCTF 工具合集 <span>v2.1.1</span></h1>
+            <p><b>LUT 信息安全协会</b> · <b>奇点战队</b> 的离线解题工作台。收录编解码、密码学、隐写、取证、Web、二进制与应急响应，全部本地运行。</p>
           </div>
           <div class="welcome-stats">
             <div class="w-stat"><b>${total}</b><span>内置工具</span></div>

@@ -1,23 +1,23 @@
-# 奇点 CTF 工具合集 · 奇点战队
+# LUTCTF 工具合集 · LUT 信息安全协会 / 奇点战队
 
-面向 **奇点战队（Singularity）** 与 **甘肃省「海丰杯」高校网络安全技能大赛** 的一体化解题工作台。
+面向 **LUT 信息安全协会 · 奇点战队（Singularity）** 与 **甘肃省「海丰杯」高校网络安全技能大赛** 的一体化解题工作台。
 
-![奇点 CTF 工具合集](assets/screenshot.png)
+![LUTCTF 工具合集](assets/screenshot.png)
 
 > 49 个内置工具入口 · 集成 EBCTFCodeBox 811 函数 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
-> v2.1 新增：奇点战队品牌、EBCTFCodeBox 完整密码学工具箱（Apache-2.0，811 函数）
+> v2.1 新增：LUT 主品牌 + 奇点战队小细节、EBCTFCodeBox 完整密码学工具箱（Apache-2.0，811 函数）
 > v2.0 新增：一把梭智能解码、配方链、字符显示器、收藏夹与侧栏计数、外部工具启动台、Base36/45/62
 > v1.1 新增：PCAP/PCAPNG 流量分析、PNG 宽高修复、Web 字典爆破、Cookie 越权、AES-CBC 原始字节、ELF/PE checksec、Pwn 速查、QR 识别、Brainfuck、核心价值观、海丰杯 2025 题目复盘
 
 ## 下载
 
-[**GitHub Releases · v2.1.0**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.1.0) → 下载 `Qidian-CTF-Toolkit-2.1.0-win-x64.zip`，解压后双击 `奇点 CTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
+[**GitHub Releases · v2.1.1**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.1.1) → 下载 `LUTCTF-Toolkit-2.1.1-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
 
 ---
 
 ## 一、快速开始
 
-**方式一（推荐）**：双击桌面上的 **「奇点 CTF 工具合集」** 快捷方式即可启动。
+**方式一（推荐）**：双击桌面上的 **「LUTCTF 工具合集」** 快捷方式即可启动。
 
 **方式二**：进入项目目录 `LUTCTF-Toolkit`，双击 `start.bat`。
 
@@ -29,7 +29,7 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 ```
 
 **方式四（发给同学 / 下载即用）**：
-从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.1.0) 下载 `Qidian-CTF-Toolkit-2.1.0-win-x64.zip`，解压后双击 `奇点 CTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
+从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.1.1) 下载 `LUTCTF-Toolkit-2.1.1-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
 
 > 首次启动若被 Windows Defender SmartScreen 拦截，选择「更多信息 → 仍要运行」即可（未签名的自编译应用常见现象）。
 
@@ -188,4 +188,4 @@ LUTCTF-Toolkit/
 
 ---
 
-**Built for 奇点战队（Singularity） · 为海丰杯而生**
+**Built for LUT 信息安全协会 · 奇点战队（Singularity） · 为海丰杯而生**
