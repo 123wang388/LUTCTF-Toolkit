@@ -382,7 +382,7 @@
           • <b>外部整合</b>：本机工具箱一键唤起、在线资源导航、海丰杯备战指南
         </div>`) +
         T.card('第三方组件', `<div class="result">
-          <b>EBCTFCodeBox</b> · Apache-2.0 · 811 函数 · <a href="#" id="ebNotice" style="color:var(--accent)">上游 GitHub</a><br>
+          <b>EBCTFCodeBox</b> · Apache-2.0 · 878 函数 · <a href="#" id="ebNotice" style="color:var(--accent)">上游 GitHub</a><br>
           <b>jsQR</b> · MIT · 离线二维码识别<br>
           <b>Electron / electron-builder</b> · MIT · 运行时与打包<br>
           完整来源、版本和修改说明见项目根目录 <code>THIRD_PARTY_NOTICES.md</code>。
