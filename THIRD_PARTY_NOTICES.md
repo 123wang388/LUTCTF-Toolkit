@@ -7,8 +7,8 @@
 - 上游：<https://github.com/Henglie/EBCTFCodeBox>
 - 版本/提交：`v0.1.12`，`45f004c6cc7b0c344ba3acd335689be10dd60b02`
 - 许可证：**Apache License 2.0**；完整文本见 [`renderer/ebctf/LICENSE`](renderer/ebctf/LICENSE)
-- 使用方式：将上游静态站点文件原样放置于 `renderer/ebctf/`，由主进程在 `127.0.0.1` 的随机端口提供本地静态服务，并通过 iframe 嵌入「EBCTFCodeBox 完整密码学工具箱」页面。
-- 修改说明：未修改上游算法或业务代码；仅在应用侧增加本地静态服务、iframe 容器和入口封装。若后续修改上游文件，应在此处补充说明。
+- 使用方式：保留上游算法引擎（`src/core/`、`public/`、`addons/`、`bin/` 等），移除上游工具箱界面（`index.html`、`src/main.js`、`src/ui/`）；由主进程在 `127.0.0.1` 的随机端口提供 `engine.html`，本应用通过原生函数库界面调用，不再显示上游工具箱。
+- 修改说明：未修改上游算法；应用的 `engine.html` 仅负责加载算法注册表并以 `postMessage` 暴露调用接口；上游 UI 文件已删除。
 - 上游版权与第三方资源声明：见 `renderer/ebctf/` 中的 `LICENSE`、`README.md` 及其自带资源文件。
 
 ## jsQR

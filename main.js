@@ -110,7 +110,7 @@ function startEbctfServer() {
 }
 
 ipcMain.on('ebctf-url', (e) => {
-  e.returnValue = ebctfPort ? `http://127.0.0.1:${ebctfPort}/index.html` : '';
+  e.returnValue = ebctfPort ? `http://127.0.0.1:${ebctfPort}/engine.html` : '';
 });
 
 /* 兼容性加固：虚拟机 / 远程桌面 / 显卡驱动异常的环境下，

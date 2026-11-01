@@ -362,7 +362,7 @@
       const d = document.createElement('div');
       d.innerHTML =
         `<div class="w-hero">
-          <h1>LUTCTF 工具合集 <span style="font-size:13px;color:var(--fg-mute);font-weight:400">v2.1.1</span></h1>
+          <h1>LUTCTF 工具合集 <span style="font-size:13px;color:var(--fg-mute);font-weight:400">v2.2.0</span></h1>
           <p>LUT 信息安全协会 · 奇点战队（Singularity）专用 · 为甘肃省「海丰杯」高校网络安全技能大赛打造的一体化解题工作台。</p>
         </div>` +
         T.card('设计原则', `<div class="result">

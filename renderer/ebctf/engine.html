@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><title>EBCTF engine</title></head>
+<body>
+<script type="module">
+import "./src/core/registerAll.js";
+import { CATEGORIES, OPS, getOp, defaultParams } from "./src/core/registry.js";
+import { ensureAll } from "./src/core/lazyCore.js";
+
+function plainParams(op) {
+  return (op.params || []).map(p => ({
+    key: p.key,
+    label: p.label || p.key,
+    type: p.type || 'text',
+    default: p.default,
+    placeholder: p.placeholder || '',
+    options: (p.options || []).map(o => typeof o === 'object' ? { value: o.value, label: o.label || String(o.value) } : { value: o, label: String(o) })
+  }));
+}
+function meta() {
+  const cats = CATEGORIES.filter(c => OPS.some(o => o.cat === c.id)).map(c => ({ id: c.id, name: c.name }));
+  const ops = OPS.map(o => ({
+    id: o.id, cat: o.cat, name: o.name, desc: o.desc || '',
+    params: plainParams(o), acceptsBytes: !!o.acceptsBytes,
+    hasEncode: typeof o.encode === 'function',
+    hasDecode: typeof o.decode === 'function',
+    hasRun: typeof o.run === 'function'
+  }));
+  return { cats, ops };
+}
+function toBytes(v) {
+  if (!v) return null;
+  if (v instanceof Uint8Array) return Array.from(v);
+  if (Array.isArray(v)) return v;
+  if (v instanceof ArrayBuffer) return Array.from(new Uint8Array(v));
+  return null;
+}
+function dataUrlBytes(url) {
+  try {
+    const b64 = String(url).split(',')[1] || '';
+    const bin = atob(b64);
+    const out = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return Array.from(out);
+  } catch { return null; }
+}
+function normalizeFiles(files) {
+  return (files || []).map(f => {
+    const out = { name: f.name || 'output.bin', mime: f.mime || 'application/octet-stream' };
+    const b = toBytes(f.bytes);
+    if (b) out.bytes = b;
+    else if (f.dataUrl) { out.dataUrl = f.dataUrl; out.bytes = dataUrlBytes(f.dataUrl); }
+    return out;
+  });
+}
+
+await ensureAll().catch(() => {});
+parent.postMessage({ type: 'eb-engine-ready', ...meta() }, '*');
+
+window.addEventListener('message', async (e) => {
+  const m = e.data || {};
+  if (m.type !== 'eb-engine-run') return;
+  const reqId = m.reqId;
+  try {
+    const op = getOp(m.id);
+    if (!op) throw new Error('找不到功能：' + m.id);
+    const dir = m.dir || (op.decode ? 'decode' : op.encode ? 'encode' : 'run');
+    const fn = dir === 'encode' ? (op.encode || op.run) : dir === 'decode' ? (op.decode || op.run) : (op.run || op.decode || op.encode);
+    if (typeof fn !== 'function') throw new Error('该功能不支持当前方向');
+    const p = Object.assign({}, defaultParams(op), m.params || {});
+    if (m.fileBytes) {
+      p.rawBytes = Uint8Array.from(m.fileBytes);
+      p.fileName = m.fileName || 'input.bin';
+      p.mime = m.mime || 'application/octet-stream';
+    }
+    const r = await fn(m.text || '', p);
+    let text = '', files = [];
+    if (r && typeof r === 'object' && !(r instanceof Uint8Array) && !(r instanceof ArrayBuffer) && !Array.isArray(r)) {
+      text = r.text == null ? '' : String(r.text);
+      files = normalizeFiles(r.files);
+    } else if (r instanceof Uint8Array || r instanceof ArrayBuffer) {
+      const b = toBytes(r) || [];
+      text = '[二进制 ' + b.length + ' bytes]\n' + b.slice(0, 64).map(x => x.toString(16).padStart(2, '0')).join(' ');
+      files = [{ name: 'output.bin', mime: 'application/octet-stream', bytes: b }];
+    } else {
+      text = r == null ? '' : String(r);
+    }
+    parent.postMessage({ type: 'eb-engine-result', reqId, ok: true, text, files }, '*');
+  } catch (err) {
+    parent.postMessage({ type: 'eb-engine-result', reqId, ok: false, error: err && err.message ? err.message : String(err) }, '*');
+  }
+});
+</script>
+</body>
+</html>

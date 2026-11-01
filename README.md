@@ -4,14 +4,14 @@
 
 ![LUTCTF 工具合集](assets/screenshot.png)
 
-> 49 个内置工具入口 · 集成 EBCTFCodeBox 811 函数 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
-> v2.1 新增：LUT 主品牌 + 奇点战队小细节、EBCTFCodeBox 完整密码学工具箱（Apache-2.0，811 函数）
+> 49 个内置工具入口 · 集成 EBCTFCodeBox 878 函数 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
+> v2.2 新增：移除 EBCTFCodeBox 上游工具箱 UI，把 878 个函数原生合并进本应用函数库
 > v2.0 新增：一把梭智能解码、配方链、字符显示器、收藏夹与侧栏计数、外部工具启动台、Base36/45/62
 > v1.1 新增：PCAP/PCAPNG 流量分析、PNG 宽高修复、Web 字典爆破、Cookie 越权、AES-CBC 原始字节、ELF/PE checksec、Pwn 速查、QR 识别、Brainfuck、核心价值观、海丰杯 2025 题目复盘
 
 ## 下载
 
-[**GitHub Releases · v2.1.1**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.1.1) → 下载 `LUTCTF-Toolkit-2.1.1-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
+[**GitHub Releases · v2.2.0**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.2.0) → 下载 `LUTCTF-Toolkit-2.2.0-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
 
 ---
 
@@ -29,7 +29,7 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 ```
 
 **方式四（发给同学 / 下载即用）**：
-从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.1.1) 下载 `LUTCTF-Toolkit-2.1.1-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
+从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.2.0) 下载 `LUTCTF-Toolkit-2.2.0-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
 
 > 首次启动若被 Windows Defender SmartScreen 拦截，选择「更多信息 → 仍要运行」即可（未签名的自编译应用常见现象）。
 
@@ -108,8 +108,8 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 ### 🧪 EBCTFCodeBox 完整模块（v2.1）
 - 集成 **[EBCTFCodeBox](https://github.com/Henglie/EBCTFCodeBox)**（Apache-2.0）：800+ 编解码/密码学/隐写/分析函数
 - 含一把梭、配方链、图形编码图鉴、全 Unicode 显示、深奥语言等完整功能
-- 作为独立静态模块嵌入，由本机 `127.0.0.1` 临时端口提供；不联网、不上传
-- 上游代码未修改，License 与来源见 `renderer/ebctf/LICENSE`、`THIRD_PARTY_NOTICES.md`
+- **只保留算法引擎，移除上游工具箱 UI**；在本应用里以原生函数库界面调用，不显示第三方工具箱外壳
+- 上游代码未修改；License 与来源见 `renderer/ebctf/LICENSE`、`THIRD_PARTY_NOTICES.md`
 
 ### 📡 流量 / 取证（v1.1 新增）
 - **PCAP 流量分析台**：离线解析 pcap/pcapng，提取 HTTP 请求/响应、multipart 上传对象、DNS、Telnet、TCP 流、字符串与 flag 线索，支持导出对象

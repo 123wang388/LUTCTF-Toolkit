@@ -43,16 +43,16 @@ const App = (function () {
   /* ---------- 分类元信息 ---------- */
   const CATS = [
     { id: 'encode', name: '编码转换', color: '#2f81f7', desc: 'Base 全族 / URL / Hex / Unicode / Morse' },
-    { id: 'classical', name: '古典密码', color: '#a371f7', desc: '凯撒 / 维吉尼亚 / 栅栏 / 替换' },
+    { id: 'misc', name: '杂项辅助', color: '#d29922', desc: '进制 / 时间 / 正则 / 字典 / 深奥语言' },
     { id: 'crypto', name: '现代密码', color: '#ff7a2f', desc: '哈希 / AES / 国密 SM3·SM4 / RSA' },
+    { id: 'classical', name: '古典密码', color: '#a371f7', desc: '凯撒 / 维吉尼亚 / 栅栏 / 替换' },
+    { id: 'web', name: 'Web 安全', color: '#3fb950', desc: '注入 / XSS / JWT / 请求构造 / 爆破' },
     { id: 'stego', name: '隐写取证', color: '#39c5cf', desc: 'LSB / 位平面 / 文件结构 / 频谱' },
     { id: 'forensics', name: '流量/取证', color: '#56d4dd', desc: 'PCAP / PNG 修复 / 文件对象 / 流量' },
-    { id: 'web', name: 'Web 安全', color: '#3fb950', desc: '注入 / XSS / JWT / 请求构造 / 爆破' },
     { id: 'pwn', name: '二进制 / Pwn', color: '#ff7b72', desc: 'ELF/PE / checksec / ROP / 模板' },
-    { id: 'misc', name: '杂项辅助', color: '#d29922', desc: '进制 / 时间 / 正则 / 字典 / 深奥语言' },
     { id: 'blue', name: '应急响应', color: '#f85149', desc: '排查清单 / 命令速查 / 加固' },
-    { id: 'ext', name: '外部工具', color: '#94a6c2', desc: '本机工具箱 / 在线资源 / 知识库' },
-    { id: 'ctf', name: '题目实战', color: '#d2a8ff', desc: '海丰杯 2025 复盘 / 工具映射 / 自测' }
+    { id: 'ctf', name: '题目实战', color: '#d2a8ff', desc: '海丰杯 2025 复盘 / 工具映射 / 自测' },
+    { id: 'ext', name: '外部工具', color: '#94a6c2', desc: '本机工具箱 / 在线资源 / 知识库' }
   ];
   const catMap = Object.fromEntries(CATS.map(c => [c.id, c]));
 
@@ -157,7 +157,7 @@ const App = (function () {
         <div class="welcome-head">
           <div class="wh-main">
             <div class="eyebrow">LUT · SINGULARITY</div>
-            <h1>LUTCTF 工具合集 <span>v2.1.1</span></h1>
+            <h1>LUTCTF 工具合集 <span>v2.2.0</span></h1>
             <p><b>LUT 信息安全协会</b> · <b>奇点战队</b> 的离线解题工作台。收录编解码、密码学、隐写、取证、Web、二进制与应急响应，全部本地运行。</p>
           </div>
           <div class="welcome-stats">
