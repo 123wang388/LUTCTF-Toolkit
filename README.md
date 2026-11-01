@@ -2,6 +2,8 @@
 
 面向 **兰州理工大学 K4L0NG 战队** 与 **甘肃省「海丰杯」高校网络安全技能大赛** 的一体化解题工作台。
 
+![LUTCTF 工具合集](assets/screenshot.png)
+
 > 43 个内置工具 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
 > v1.1 新增：PCAP/PCAPNG 流量分析、PNG 宽高修复、Web 字典爆破、Cookie 越权、AES-CBC 原始字节、ELF/PE checksec、Pwn 速查、QR 识别、Brainfuck、核心价值观、海丰杯 2025 题目复盘
 
