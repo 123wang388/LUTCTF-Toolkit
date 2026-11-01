@@ -1,0 +1,58 @@
+# ============ 依赖与构建产物 ============
+node_modules/
+dist/
+dist2/
+build/
+release/
+out/
+*.asar
+*.zip
+*.exe
+
+# ============ 日志 ============
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+logs/
+
+# ============ 编辑器 / IDE ============
+.vscode/
+.idea/
+*.sublime-project
+*.swp
+*.swo
+*~
+
+# ============ 操作系统 ============
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+desktop.ini
+ehthumbs.db
+Icon?
+
+# ============ 环境变量与密钥 ============
+# ⚠️ 安全起见，任何含凭证的文件都不应提交
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+secrets.json
+config.local.*
+
+# ============ 打包临时文件 ============
+*.tsbuildinfo
+.cache/
+.temp/
+tmp/
+
+# ============ 本工具生成的临时产物 ============
+# 解题过程中导出的切片、字典等结果文件
+exports/
+*.ews-crx

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:;">
+<title>LUTCTF 工具合集 · 兰州理工大学 K4L0NG</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ===== 标题栏 ===== -->
+<header class="titlebar">
+  <div class="tb-left">
+    <div class="logo" id="logo">LUT</div>
+    <div class="tb-title">
+      <span class="appname">LUTCTF 工具合集</span>
+      <span class="appsub">兰州理工大学 · K4L0NG · 海丰杯专版</span>
+    </div>
+  </div>
+
+  <div class="tb-center">
+    <div class="searchbox">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 1 0-.7.7l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/></svg>
+      <input type="text" id="globalSearch" placeholder="搜索工具 / 算法 / 考点…  (Ctrl+K)" autocomplete="off">
+      <kbd>Ctrl+K</kbd>
+    </div>
+  </div>
+
+  <div class="tb-right">
+    <button class="tb-btn" id="btnHome" title="工具总览">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M4 4h6v6H4V4zm10 0h6v6h-6V4zM4 14h6v6H4v-6zm10 0h6v6h-6v-6z"/></svg>
+    </button>
+    <button class="tb-btn" id="btnTheme" title="切换主题">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.39 5.39 0 0 1-4.4 2.26 5.5 5.5 0 0 1-3.14-9.8c-.44-.06-.9-.1-1.36-.1z"/></svg>
+    </button>
+    <button class="tb-btn" id="btnPin" title="窗口置顶">
+      <svg viewBox="0 0 24 24" class="ico"><path d="M16 3v2l-1 1v4l2 2v2h-4v6l-1 1-1-1v-6H7v-2l2-2V6L8 5V3h8z"/></svg>
+    </button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn win-btn" id="btnMin"><svg viewBox="0 0 24 24" class="ico"><path d="M5 12h14v1H5z"/></svg></button>
+    <button class="tb-btn win-btn" id="btnMax"><svg viewBox="0 0 24 24" class="ico"><path d="M5 5h14v14H5V5zm1 1v12h12V6H6z"/></svg></button>
+    <button class="tb-btn win-btn danger" id="btnClose"><svg viewBox="0 0 24 24" class="ico"><path d="M6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6 6.4 5z"/></svg></button>
+  </div>
+</header>
+
+<!-- ===== 主体 ===== -->
+<div class="body-wrap">
+
+  <!-- 侧栏 -->
+  <aside class="sidebar" id="sidebar">
+    <div class="side-scroll" id="sideNav"></div>
+    <div class="side-foot">
+      <button class="side-foot-btn" id="btnAbout">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+        <span>关于</span>
+      </button>
+      <button class="side-foot-btn" id="btnExt">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M4 4h6v2H6v4H4V4zm10 0h6v6h-2V6h-4V4zM4 14h2v4h4v2H4v-6zm14 0h2v6h-6v-2h4v-4z"/></svg>
+        <span>本机工具</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- 内容区 -->
+  <main class="content">
+    <!-- 欢迎页 / 工具容器 -->
+    <div class="tabbar" id="tabbar">
+      <div class="tabs" id="tabs"></div>
+    </div>
+    <div class="workspace" id="workspace">
+      <div class="welcome" id="welcome"> </div>
+      <div class="panel-host" id="panelHost"></div>
+    </div>
+  </main>
+</div>
+
+<!-- ===== 浮动提示 ===== -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ===== 搜索结果浮层 ===== -->
+<div class="omni" id="omni" hidden>
+  <div class="omni-box">
+    <input type="text" id="omniInput" placeholder="输入工具名、算法或考点关键词…">
+    <div class="omni-list" id="omniList"></div>
+    <div class="omni-foot"><span>↑↓ 选择</span><span>Enter 打开</span><span>Esc 关闭</span></div>
+  </div>
+</div>
+
+<script src="js/core/codec.js"></script>
+<script src="js/core/classical.js"></script>
+<script src="js/core/digest.js"></script>
+<script src="js/core/rsa.js"></script>
+<script src="js/core/stego.js"></script>
+<script src="js/core/webkit.js"></script>
+<script src="js/core/misc.js"></script>
+<script src="js/core/exttools.js"></script>
+<script src="js/core/forensics.js"></script>
+<script src="js/core/ctf.js"></script>
+<script src="vendor/jsqr.js"></script>
+<script src="js/app.js"></script>
+<!-- 工具注册表（需先加载 app.js 提供的 App.T 构件） -->
+<script src="js/registry.js"></script>
+<script src="js/registry2.js"></script>
+<script src="js/registry3.js"></script>
+<script src="js/registry4.js"></script>
+<script src="js/registry5.js"></script>
+</body>
+</html>
