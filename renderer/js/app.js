@@ -8,6 +8,17 @@ const App = (function () {
   const state = { current: null, tabs: [], pins: new Set() };
   const $ = s => document.querySelector(s);
 
+  /* ---------- 收藏（本地持久化） ---------- */
+  const FAV_KEY = 'lutctf-favorites';
+  let favSet = new Set();
+  try { favSet = new Set(JSON.parse(localStorage.getItem(FAV_KEY) || '[]')); } catch (e) { }
+  function isFav(id) { return favSet.has(id); }
+  function toggleFav(id) {
+    if (favSet.has(id)) favSet.delete(id); else favSet.add(id);
+    try { localStorage.setItem(FAV_KEY, JSON.stringify([...favSet])); } catch (e) { }
+    return favSet.has(id);
+  }
+
   /* ---------- Toast ---------- */
   function toast(msg, type = '') {
     const el = document.createElement('div');
@@ -55,7 +66,7 @@ const App = (function () {
       const g = document.createElement('div');
       g.className = 'nav-group';
       g.innerHTML =
-        `<div class="nav-group-title"><span class="gdot" style="background:${cat.color}"></span>${cat.name}<span class="caret">▼</span></div>
+        `<div class="nav-group-title"><span class="gdot" style="background:${cat.color}"></span>${cat.name}<span class="nav-count">${items.length}</span><span class="caret">▼</span></div>
          <div class="nav-items">` +
         items.map(t => `<div class="nav-item" data-id="${t.id}" title="${esc(t.desc || '')}">
             <span>${esc(t.name)}</span>${t.badge ? `<span class="badge">${t.badge}</span>` : ''}</div>`).join('') +
@@ -88,11 +99,14 @@ const App = (function () {
     panel.innerHTML =
       `<div class="p-head">
         <div class="p-title"><div class="pico" style="color:${color}">${tool.icon || '⚙'}</div>${esc(tool.name)}
-          ${tool.cat ? `<span class="tag">${esc(catMap[tool.cat] ? catMap[tool.cat].name : tool.cat)}</span>` : ''}</div>
+          ${tool.cat ? `<span class="tag">${esc(catMap[tool.cat] ? catMap[tool.cat].name : tool.cat)}</span>` : ''}
+          <button class="fav ${isFav(tool.id) ? 'on' : ''}" data-fav="${tool.id}" title="收藏这个工具">★</button></div>
         ${tool.desc ? `<div class="p-desc">${tool.desc}</div>` : ''}
         ${tool.tags ? `<div class="p-tags">${tool.tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
       </div>`;
     host.appendChild(panel);
+    const favBtn = panel.querySelector('[data-fav]');
+    if (favBtn) favBtn.onclick = () => favBtn.classList.toggle('on', toggleFav(tool.id));
     try {
       tool.render(panel);
     } catch (e) {
@@ -137,23 +151,26 @@ const App = (function () {
   function renderWelcome() {
     const cats = CATS.filter(c => TOOLS.some(t => t.cat === c.id));
     const total = TOOLS.length;
+    const favCount = TOOLS.filter(t => isFav(t.id)).length;
     $('#welcome').innerHTML =
       `<div class="welcome-inner">
         <div class="welcome-head">
           <div class="wh-main">
             <div class="eyebrow">LUTCTF · K4L0NG</div>
-            <h1>工具合集 <span>v1.1</span></h1>
-            <p>面向兰州理工大学 K4L0NG 战队与甘肃省“海丰杯”的离线解题工作台。点开任意卡片即可使用，全部算法本地运行。</p>
+            <h1>工具合集 <span>v2.0</span></h1>
+            <p>面向兰州理工大学 K4L0NG 战队与甘肃省“海丰杯”的离线解题工作台。收录编解码、密码学、隐写、取证、Web、二进制与应急响应，全部本地运行。</p>
           </div>
           <div class="welcome-stats">
             <div class="w-stat"><b>${total}</b><span>内置工具</span></div>
             <div class="w-stat"><b>${cats.length}</b><span>知识域</span></div>
+            <div class="w-stat"><b>${favCount}</b><span>已收藏</span></div>
             <div class="w-stat"><b>100%</b><span>离线可用</span></div>
           </div>
         </div>
         <div class="welcome-toolbar">
           <div class="wchips" id="welcomeChips">
             <button class="wchip ${welcomeCat === 'all' ? 'active' : ''}" data-cat="all">全部 <i>${total}</i></button>
+            <button class="wchip ${welcomeCat === 'fav' ? 'active' : ''}" data-cat="fav">★ 收藏 <i>${favCount}</i></button>
             ${cats.map(c => `<button class="wchip ${welcomeCat === c.id ? 'active' : ''}" data-cat="${c.id}">${esc(c.name)} <i>${TOOLS.filter(t => t.cat === c.id).length}</i></button>`).join('')}
           </div>
           <input id="welcomeSearch" class="wsearch" placeholder="在合集里筛选，如 base / RSA / 隐写…" value="${esc(welcomeQuery)}">
@@ -175,21 +192,32 @@ const App = (function () {
     const host = $('#welcomeGrid');
     if (!host) return;
     const q = welcomeQuery.trim().toLowerCase();
-    const list = TOOLS.filter(t => (welcomeCat === 'all' || t.cat === welcomeCat) && (!q || toolHay(t).includes(q)));
+    const list = TOOLS.filter(t => {
+      if (welcomeCat === 'fav' && !isFav(t.id)) return false;
+      if (welcomeCat !== 'all' && welcomeCat !== 'fav' && t.cat !== welcomeCat) return false;
+      return !q || toolHay(t).includes(q);
+    });
     if (!list.length) {
-      host.innerHTML = `<div class="welcome-empty">没有匹配的工具，换个关键词试试。</div>`;
+      host.innerHTML = `<div class="welcome-empty">没有匹配的工具，换个关键词试试${welcomeCat === 'fav' ? '，或先点卡片右上角 ★ 收藏' : ''}。</div>`;
       return;
     }
     host.innerHTML = list.map(t => {
       const cat = catMap[t.cat] || { color: '#888', name: '' };
       return `<div class="tcard" data-open="${t.id}">
         <div class="tc-top"><div class="tci" style="background:${hexA(cat.color)};color:${cat.color}">${t.icon || '⚙'}</div>
-        <span class="tcat" style="color:${cat.color};border-color:${hexA(cat.color)}">${esc(cat.name)}</span></div>
+        <div class="tc-right"><button class="fav ${isFav(t.id) ? 'on' : ''}" data-fav="${t.id}" title="收藏">★</button>
+        <span class="tcat" style="color:${cat.color};border-color:${hexA(cat.color)}">${esc(cat.name)}</span></div></div>
         <h4>${esc(t.name)}</h4>
         <p>${esc(t.desc || '')}</p>
       </div>`;
     }).join('');
     host.querySelectorAll('[data-open]').forEach(el => el.onclick = () => openTool(el.dataset.open));
+    host.querySelectorAll('[data-fav]').forEach(btn => btn.onclick = e => {
+      e.stopPropagation();
+      const on = toggleFav(btn.dataset.fav);
+      btn.classList.toggle('on', on);
+      renderWelcomeGrid();
+    });
   }
   function goHome() {
     state.tabs = [];
@@ -336,5 +364,5 @@ const App = (function () {
   };
 
   document.addEventListener('DOMContentLoaded', init);
-  return { toast, copy, download, openTool, ipc, T, esc, catMap, state, tryDecode, closeTab };
+  return { toast, copy, download, openTool, ipc, T, esc, catMap, state, tryDecode, closeTab, isFav, toggleFav };
 })();

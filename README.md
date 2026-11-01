@@ -4,12 +4,13 @@
 
 ![LUTCTF 工具合集](assets/screenshot.png)
 
-> 43 个内置工具 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
+> 48 个内置工具 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
+> v2.0 新增：一把梭智能解码、配方链、字符显示器、收藏夹与侧栏计数、外部工具启动台、Base36/45/62
 > v1.1 新增：PCAP/PCAPNG 流量分析、PNG 宽高修复、Web 字典爆破、Cookie 越权、AES-CBC 原始字节、ELF/PE checksec、Pwn 速查、QR 识别、Brainfuck、核心价值观、海丰杯 2025 题目复盘
 
 ## 下载
 
-[**GitHub Releases · v1.1.0**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v1.1.0) → 下载 `LUTCTF.v1.1.Win64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
+[**GitHub Releases · v2.0.0**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.0.0) → 下载 `LUTCTF.v2.0.Win64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
 
 ---
 
@@ -27,7 +28,7 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 ```
 
 **方式四（发给同学 / 下载即用）**：
-从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v1.1.0) 下载 `LUTCTF.v1.1.Win64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
+从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.0.0) 下载 `LUTCTF.v2.0.Win64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
 
 > 首次启动若被 Windows Defender SmartScreen 拦截，选择「更多信息 → 仍要运行」即可（未签名的自编译应用常见现象）。
 
@@ -94,6 +95,14 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 - **本机工具箱**：整合 sqlmap / nmap / hashcat / binwalk / zsteg / volatility 等 **50+ 外部工具**，检测本机安装情况并**一键拉起终端**
 - **在线资源导航**：CTF 训练平台、Writeup 站点、密码查询、威胁情报
 - **海丰杯备战指南**：按官方赛点拆解五大方向 + K4L0NG 战队分工与比赛节奏建议
+
+### 🎯 效率与体验（v2.0 新增）
+- **一把梭智能解码**：递归尝试 Base64/32/58/85/91、Hex、URL、Unicode、QP、ROT13、核心价值观、Base36/45/62 等，按可读性评分给出最佳解码链
+- **配方链**：把多个编码/解码/哈希操作串成流水线，支持排序、保存和读取，类似 CyberChef Recipe
+- **字符显示器**：逐字符查看 Unicode 码点、UTF-8/UTF-16 字节、HTML 实体、URL/Base64，排查零宽/全角/隐藏字符
+- **收藏夹与侧栏计数**：卡片右上角 ★ 收藏，首页“收藏”筛选，侧栏显示每个知识域的工具数
+- **外部工具启动台**：按 Web/信息收集/密码/隐写/逆向/流量分类展示本机工具，检测安装状态并一键开终端
+- **Base36 / Base45 / Base62**：补全 CTF 常见的非标准 Base 编码（Base45 常用于 QR）
 
 ### 📡 流量 / 取证（v1.1 新增）
 - **PCAP 流量分析台**：离线解析 pcap/pcapng，提取 HTTP 请求/响应、multipart 上传对象、DNS、Telnet、TCP 流、字符串与 flag 线索，支持导出对象
