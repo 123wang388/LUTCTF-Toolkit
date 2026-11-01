@@ -157,7 +157,7 @@ const App = (function () {
         <div class="welcome-head">
           <div class="wh-main">
             <div class="eyebrow">LUT · SINGULARITY</div>
-            <h1>LUTCTF 工具合集 <span>v2.2.0</span></h1>
+            <h1>LUTCTF 工具合集 <span>v2.2.1</span></h1>
             <p><b>LUT 信息安全协会</b> · <b>奇点战队</b> 的离线解题工作台。收录编解码、密码学、隐写、取证、Web、二进制与应急响应，全部本地运行。</p>
           </div>
           <div class="welcome-stats">

@@ -11,7 +11,7 @@
 
 ## 下载
 
-[**GitHub Releases · v2.2.0**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.2.0) → 下载 `LUTCTF-Toolkit-2.2.0-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
+[**GitHub Releases · v2.2.1**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.2.1) → 下载 `LUTCTF-Toolkit-2.2.1-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
 
 ---
 
@@ -29,7 +29,7 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 ```
 
 **方式四（发给同学 / 下载即用）**：
-从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.2.0) 下载 `LUTCTF-Toolkit-2.2.0-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
+从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v2.2.1) 下载 `LUTCTF-Toolkit-2.2.1-win-x64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
 
 > 首次启动若被 Windows Defender SmartScreen 拦截，选择「更多信息 → 仍要运行」即可（未签名的自编译应用常见现象）。
 

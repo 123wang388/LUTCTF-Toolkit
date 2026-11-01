@@ -1,6 +1,6 @@
 {
   "name": "lutctf-toolkit",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "LUT 信息安全协会 · 奇点战队 CTF 工具合集 - 为海丰杯而生",
   "main": "main.js",
   "author": "LUT 信息安全协会 / 奇点战队",

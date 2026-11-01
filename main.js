@@ -305,7 +305,14 @@ ipcMain.on('run-cmd', (_e, cmd) => {
   if (typeof cmd !== 'string' || !cmd.trim()) return;
   try {
     if (process.platform === 'win32') {
-      spawn('cmd.exe', ['/k', cmd], { detached: true, stdio: 'ignore', cwd: app.getPath('home') }).unref();
+      /* detached + stdio:'ignore' 会创建 DETACHED_PROCESS，cmd.exe 没有控制台窗口。
+         用 cmd /c start 显式开一个新的控制台，否则用户点“启动”看不到任何窗口。 */
+      spawn('cmd.exe', ['/c', 'start', 'LUTCTF Tool', 'cmd.exe', '/k', cmd], {
+        detached: true,
+        stdio: 'ignore',
+        windowsHide: false,
+        cwd: app.getPath('home')
+      }).unref();
     } else if (process.platform === 'darwin') {
       spawn('osascript', ['-e', 'tell app "Terminal" to do script ' + JSON.stringify(cmd)], { detached: true, stdio: 'ignore' }).unref();
     } else {
