@@ -5,6 +5,10 @@
 > 43 个内置工具 · 完全离线 · 数据不外传 · 针对国产商用密码（SM3/SM4）专项覆盖
 > v1.1 新增：PCAP/PCAPNG 流量分析、PNG 宽高修复、Web 字典爆破、Cookie 越权、AES-CBC 原始字节、ELF/PE checksec、Pwn 速查、QR 识别、Brainfuck、核心价值观、海丰杯 2025 题目复盘
 
+## 下载
+
+[**GitHub Releases · v1.1.0**](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v1.1.0) → 下载 `LUTCTF.v1.1.Win64.zip`，解压后双击 `LUTCTF 工具合集.exe`（或 `启动（推荐）.bat`）。**不需要 Node.js / Java / Python。**
+
 ---
 
 ## 一、快速开始
@@ -21,7 +25,7 @@ npm start          # 或: .\node_modules\electron\dist\electron.exe .
 ```
 
 **方式四（发给同学 / 下载即用）**：
-直接分发 `dist\LUTCTF-Toolkit-1.1.0-portable.exe`。这是单文件便携版，**不需要安装 Node.js、Java 或 Python**，双击即用；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
+从 [Releases](https://github.com/123wang388/LUTCTF-Toolkit/releases/tag/v1.1.0) 下载 `LUTCTF.v1.1.Win64.zip`，解压后双击 `LUTCTF 工具合集.exe` 或 `启动（推荐）.bat`。**不需要安装 Node.js、Java 或 Python**；首次运行如被 SmartScreen 拦截，选择「更多信息 → 仍要运行」。
 
 > 首次启动若被 Windows Defender SmartScreen 拦截，选择「更多信息 → 仍要运行」即可（未签名的自编译应用常见现象）。
 
